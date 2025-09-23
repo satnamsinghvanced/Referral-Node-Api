@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec ts-node --esm src/server.ts",
+    "dev": "nodemon --watch src --ext ts --exec \"node --loader ts-node/esm src/server.ts\"",
     "start": "nodemon --watch src --ext ts --exec \"node --loader ts-node/esm src/server.ts\"",
-    "prepare": "husky install"
+    "lint": "eslint src/**/*.{js,ts} --fix",
+    "test": "echo \"No tests yet\" && exit 0",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -15,10 +16,13 @@
   "type": "module",
   "devDependencies": {
     "@types/cors": "^2.8.19",
+    "@types/eslint": "^9.6.1",
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.2",
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@typescript-eslint/parser": "^5.59.0",
+    "eslint-define-config": "^2.1.0",
     "express": "^5.1.0",
-    "husky": "^9.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   },
@@ -28,6 +32,7 @@
     "dotenv": "^17.2.2",
     "express-validator": "^7.2.1",
     "fastify": "^5.6.0",
+    "joi": "^18.0.1",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.20.0",
     "mongoose": "^8.18.1",
