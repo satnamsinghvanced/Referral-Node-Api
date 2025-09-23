@@ -3,7 +3,6 @@ import Payment from "../../models/payment.ts";
 import { sendSuccess, sendError } from "../../utils/responseHelpers.ts";
 import { CONTROLLER_MESSAGES as CM } from "../../constant/payment.ts";
 import stripe from "../../config/stripe.ts";
-import { users } from "../../models/user.ts";
 class PaymentController {
   static async getAll(req: Request, res: Response): Promise<Response> {
     try {

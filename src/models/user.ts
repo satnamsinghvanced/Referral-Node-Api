@@ -32,5 +32,5 @@ const userSchema = new Schema({
   ],
   status: { type: String, enum: ["pending", "active"] },
 });
-
-export const users = mongoose.model("user", userSchema);
+const users = mongoose.model("user", userSchema);
+export default users;
