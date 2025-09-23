@@ -1,8 +1,7 @@
-const mongoose = require("mongoose");
-
+import mongoose from "mongoose";
 const patientSchema = new mongoose.Schema(
   {
-    uniqueId:{type:String , unique:true, required: true},
+    uniqueId: { type: String, unique: true, required: true },
     fullName: { type: String },
     email: { type: String, unique: true, required: true },
     age: { type: Number },
@@ -21,14 +20,29 @@ const patientSchema = new mongoose.Schema(
     practiceAddressState: { type: String },
     practiceAddressZip: { type: String },
     treatmentType: { type: String },
-    status: { type: String, enum: ["new", "contacted", "scheduled", "completed"],default:"new"},
+    status: {
+      type: String,
+      enum: ["new", "contacted", "scheduled", "completed"],
+      default: "new",
+    },
     urgency: { type: String, enum: ["low", "medium", "high"] },
     insuranceProvider: { type: String },
-    preferredTime: { type: String, enum: ["morning", "afternoon", "evening", "afterSchool", "lunchBreak","weekend"] },
+    preferredTime: {
+      type: String,
+      enum: [
+        "morning",
+        "afternoon",
+        "evening",
+        "afterSchool",
+        "lunchBreak",
+        "weekend",
+      ],
+    },
     reasonForReferral: { type: String },
     notes: { type: String },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("patient", patientSchema);
+const Patient = mongoose.model("Patient", patientSchema);
+export default Patient;
