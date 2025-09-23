@@ -10,16 +10,16 @@ const app = express();
 const { SERVER_RUNNING, HEALTH_ROUTE_OK } = main;
 
 ConnectDB();
-
 app.use(corsMiddleware);
 app.use(express.json());
-app.use("/api", router)
+app.use("/api", router);
 app.get("/", (_, res) => {
-  res.send(SERVER_RUNNING);
+  res.send(HEALTH_ROUTE_OK);
 });
 
 const PORT = process.env.PORT || 8001;
 
+
 app.listen(PORT, () => {
-  console.log(`${HEALTH_ROUTE_OK} http://localhost:${PORT}`);
+  console.log(`${SERVER_RUNNING} http://localhost:${PORT}`);
 });

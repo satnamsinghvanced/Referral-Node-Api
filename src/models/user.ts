@@ -1,7 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 
 const userSchema = new Schema({
-  subscriptionId: { type: Schema.Types.ObjectId },
+  subscriptionId: { type: Schema.Types.ObjectId, required: true, ref: 'Subscription' },
+  paymentId: { type: Schema.Types.ObjectId, required: true, ref: "Payment" },
   firstName: { type: String },
   lastName: { type: String },
   mobile: { type: String, required: true },

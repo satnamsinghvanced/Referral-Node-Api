@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 export  interface IPrice {
   daily?: number;
   monthly?: number;
@@ -16,4 +18,15 @@ export interface ISubscription {
 
 export type ResponseStatus = "success" | "error";
 
-
+export interface IPayment extends Document {
+  userId: string;
+  subscriptionId: Types.ObjectId;
+  email : string;
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  status: string;
+  transactionId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
