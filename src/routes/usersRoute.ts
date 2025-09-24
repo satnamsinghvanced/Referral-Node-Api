@@ -9,29 +9,17 @@ import {
   userIdParamSchema,
 } from "../validators/usersValidation.ts";
 
+import { COMMON_ROUTES as CR } from "../helper/routehelper.ts";
+
+
 const userRouter = express.Router();
 
 userRouter.post("/signup", validateBody(signupSchema), userController.signup);
 userRouter.post("/login", validateBody(loginSchema), userController.login);
 
-userRouter.get("/all", auth, userController.getAllUser);
-userRouter.get(
-  "/user",
-  auth,
-  validateBody(userIdParamSchema),
-  userController.getUserById
-);
-userRouter.put(
-  "/user",
-  auth,
-  validateBody(updateUserSchema),
-  userController.updateUser
-);
-userRouter.delete(
-  "/user",
-  auth,
-  validateBody(userIdParamSchema),
-  userController.deleteUser
-);
+userRouter.get(CR.ROOT, auth, userController.getAllUser);
+userRouter.get(CR.ID_PARAM, auth,validateBody(userIdParamSchema),userController.getUserById);
+userRouter.put(CR.ROOT,auth,validateBody(updateUserSchema),userController.updateUser);
+userRouter.delete(CR.ID_PARAM,auth,validateBody(userIdParamSchema),userController.deleteUser);
 
 export default userRouter;

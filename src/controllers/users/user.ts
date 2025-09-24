@@ -14,7 +14,7 @@ interface JwtPayload {
 export default {
   async signup(req: Request, res: Response) {
     try {
-      const { 
+      const {
         firstName,
         lastName,
         email,
@@ -26,7 +26,7 @@ export default {
       } = req.body;
 
       const existingUser = await User.findOne({ email });
-     
+
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const newUser = await User.create({
@@ -45,7 +45,6 @@ export default {
         .status(200)
         .json({ message: userMessage.success.userRegistered, data: newUser });
     } catch (error) {
-      console.error("Signup Error:", error);
       return res.status(500).json({ message: userMessage.serverError });
     }
   },
@@ -92,7 +91,6 @@ export default {
         token,
       });
     } catch (error: any) {
-      console.log("Login Error", error);
       return res.status(500).json({
         message: userMessage.serverError,
         error: error.message,
@@ -108,7 +106,6 @@ export default {
         data: users,
       });
     } catch (error: any) {
-      console.error(" All Users Error:", error);
       return res
         .status(500)
         .json({ message: userMessage.serverError, error: error.message });
@@ -116,15 +113,15 @@ export default {
   },
   async getUserById(req: Request, res: Response) {
     try {
-      const userId = req.query.userId as string;
+      const {id} = req.params;
 
-      if (!userId) {
+      if (!id) {
         return res
           .status(400)
           .json({ message: userMessage.validation.userIdRequired });
       }
 
-      const user = await User.findById(userId).select("-password");
+      const user = await User.findById(id).select("-password");
 
       if (!user) {
         return res
@@ -136,7 +133,6 @@ export default {
         .status(200)
         .json({ message: userMessage.success.userFetched, data: user });
     } catch (error: any) {
-      console.error("Get User Error:", error);
       return res
         .status(500)
         .json({ message: userMessage.serverError, error: error.message });
@@ -144,14 +140,14 @@ export default {
   },
   async updateUser(req: Request, res: Response) {
     try {
-      const userId = req.query.userId as string;
+      const {id} = req.params;
       const updateFields = req.body;
 
       if (updateFields.password) {
         updateFields.password = await bcrypt.hash(updateFields.password, 10);
       }
 
-      const updatedUser = await User.findByIdAndUpdate(userId, updateFields, {
+      const updatedUser = await User.findByIdAndUpdate(id, updateFields, {
         new: true,
       }).select("-password");
 
@@ -165,7 +161,6 @@ export default {
         .status(200)
         .json({ message: userMessage.success.userUpdated, data: updatedUser });
     } catch (error: any) {
-      console.error("Update User Error:", error);
       return res
         .status(500)
         .json({ message: userMessage.serverError, error: error.message });
@@ -173,8 +168,8 @@ export default {
   },
   async deleteUser(req: Request, res: Response) {
     try {
-      const userId = req.query.userId as string;
-      const deletedUser = await User.findByIdAndDelete(userId);
+      const {id} = req.params;
+      const deletedUser = await User.findByIdAndDelete(id);
 
       if (!deletedUser) {
         return res
@@ -185,7 +180,6 @@ export default {
         .status(200)
         .json({ message: userMessage.success.userDeleted, data: deletedUser });
     } catch (error: any) {
-      console.error("Delete User Error:", error);
       return res
         .status(500)
         .json({ message: userMessage.serverError, error: error.message });
