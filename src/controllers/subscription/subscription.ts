@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import Subscription from "../../models/subscriptionSchema.ts";
 import { SUBSCRIPTION_MESSAGES } from "../../constant/subscription.ts";
 import { ISubscription } from "../../utils/type.ts";
-import { sendSuccess, sendError } from "../../utils/responseHelpers.ts";
+import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
 
 class SubscriptionController {
   static async getAll(req: Request, res: Response): Promise<Response> {

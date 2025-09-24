@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Payment from "../../models/payment.ts";
-import { sendSuccess, sendError } from "../../utils/responseHelpers.ts";
+import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
 import { CONTROLLER_MESSAGES as CM } from "../../constant/payment.ts";
 import stripe from "../../config/stripe.ts";
 class PaymentController {

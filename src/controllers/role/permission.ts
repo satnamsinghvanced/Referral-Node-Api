@@ -1,5 +1,5 @@
 import Permissions from "../../models/permissions.ts";
-import { sendError, sendSuccess } from "../../utils/responseHelpers.ts";
+import { sendError, sendSuccess } from "../../helper/responseHelpers.ts";
 import { Request, Response } from "express";
 import { PERMISSION_MESSAGES as PM } from "../../constant/permission.ts";
 
@@ -13,7 +13,7 @@ class Permission {
     }
   }
 
-  static async getOne(req: Request, res: Response): Promise<Response> {
+  static async get(req: Request, res: Response): Promise<Response> {
     try {
       const permission = await Permissions.findById(req.params.id);
       if (!permission) return sendError(res, PM.NOT_FOUND);

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ObjectSchema } from "joi";
-import { sendError } from "../utils/responseHelpers.ts";
+import { sendError } from "../helper/responseHelpers.ts";
 import { validatorConstant } from "../constant/validator.ts";
 
 export function validateBody(schema: ObjectSchema) {

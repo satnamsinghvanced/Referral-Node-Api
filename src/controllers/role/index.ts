@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Role from "../../models/role.ts";
 import { ROLE_MESSAGES } from "../../constant/role.ts";
-import { sendError, sendSuccess } from "../../utils/responseHelpers.ts";
+import { sendError, sendSuccess } from "../../helper/responseHelpers.ts";
 
 export default {
   async addRole(req: Request, res: Response): Promise<Response> {
