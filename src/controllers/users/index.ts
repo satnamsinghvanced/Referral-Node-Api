@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from "jsonwebtoken";
-import User from "../../models/user.js";
+import User from "../../models/user.ts";
 
 const secretKey = process.env.JWT_SECRET || "testsecretkey";
 const tokenExpiry = process.env.JWT_EXPIRATION || "1h";

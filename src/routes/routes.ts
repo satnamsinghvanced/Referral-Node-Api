@@ -6,6 +6,7 @@ import paymentRoute from "./paymentRoute.ts"
 import roleRouter from "./roleRoutes.ts";
 import permissionRoute from "./permission.ts";
 import practiceType from "./practiceType.ts";
+import referrerRoutes from "./referrerRoutes.ts";
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.use(R.PAYMENTS, paymentRoute);
 router.use(R.ROLES, roleRouter);
 router.use(R.PERMISSION, permissionRoute);
 router.use(R.PRACTICE_TYPE, practiceType);
+router.use(R.REFERRER,referrerRoutes)
 
 export default router

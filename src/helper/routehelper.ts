@@ -9,7 +9,8 @@ const ROUTES = {
   ROLES: "/role",
   PAYMENTS: "/payment",
   PERMISSION: "/permission",
-  PRACTICE_TYPE: "/practice"
+  PRACTICE_TYPE: "/practice",
+  REFERRER: "/referrer",
 };
 
 
