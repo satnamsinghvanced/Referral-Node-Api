@@ -51,3 +51,9 @@ export const updateSubscriptionSchema = Joi.object({
   "object.min": VALIDATION_MESSAGES.SUBSCRIPTION.UPDATE_MIN,
 });
 
+export const idParamSchema = Joi.object({
+  id: Joi.string()
+    .required()
+    .messages(VALIDATION_MESSAGES.ID_PARAM),
+});
+
