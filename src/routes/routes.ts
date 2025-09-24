@@ -1,5 +1,5 @@
 import express from "express";
-import { ROUTES as R } from "../helper/routehelper.ts"
+import { ROUTES as R } from "../helper/routehelper.ts";
 import userRouter from "./usersRoute.ts";
 import subscriptionRoute from "./subscriptionRoute.ts";
 import paymentRoute from "./paymentRoute.ts"

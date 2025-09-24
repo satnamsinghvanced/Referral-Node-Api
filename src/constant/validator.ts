@@ -1,7 +1,6 @@
 
 export const validatorConstant = {
-  VALIDATION_FAILD_MESSAGE: "Validation failed",
-
+  VALIDATION_FAILED_MESSAGE: "Validation failed",
 }
 
 
