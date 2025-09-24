@@ -5,9 +5,9 @@ import paymentRoute from "./paymentRoute.ts"
 import roleRouter from "./roleRoutes.ts";
 const router = express.Router();
 
-router.use("/users",userRouter)
+router.use("/users", userRouter)
 router.use("/subscriptions", subscriptionRoute);
 router.use("/payment", paymentRoute);
-router.use("/role",roleRouter)
+router.use("/role", roleRouter)
 
 export default router

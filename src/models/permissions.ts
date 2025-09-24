@@ -1,18 +1,28 @@
 import mongoose, { Schema } from "mongoose";
 
-const permissionsSchema = new Schema(
+const permissionSchema = new Schema(
   {
-    manageReferrals: { type: Boolean, default: false },
-    manageTeam: { type: Boolean, default: false },
-    manageSettings: { type: Boolean, default: false },
-    manageIntegrations: { type: Boolean, default: false },
-    viewAnalytics: { type: Boolean, default: false },
-    manageBilling: { type: Boolean, default: false },
-    manageReviews: { type: Boolean, default: false },
+    title: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
-const permissions = mongoose.model("permission", permissionsSchema);
+const Permission = mongoose.model("Permission", permissionSchema);
 
-export default permissions;
+export default Permission;
