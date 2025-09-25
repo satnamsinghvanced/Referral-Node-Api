@@ -10,7 +10,8 @@ const ROUTES = {
   PAYMENTS: "/payment",
   PERMISSION: "/permission",
   PRACTICE_TYPE: "/practice",
-  REFERRER: "/referrer",
+  DOC_REFERRER: "/docReferrer",
+  PAT_REFERRER: "/patientReferrer"
 };
 
 

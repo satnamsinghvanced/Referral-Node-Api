@@ -1,62 +1,39 @@
 import { Request, Response } from "express";
-import Referrer from "../../models/referrer.ts";
-import { json } from "stream/consumers";
+import patientReferrer from "../../models/patientReferrer.ts";
 
 export default {
-  async addReferrerDoctor(req: Request, res: Response) {
+  async addReferrerPatient(req: Request, res: Response) {
     try {
       const { userId } = req.params;
 
-      const {
-        type,
-        name,
-        number,
-        email,
-        practiceName,
-        practiceAddress,
-        practiceType,
-        notes,
-      } = req.body;
-
-      if (!type || !name || !number || !email) {
+      const { name, number, email, notes } = req.body;
+      if (!name || !number || !email) {
         return res.status(400).json({
           success: false,
           message: "Type, name, number, and email are required",
         });
       }
-
-      const existingReferrer = await Referrer.findOne({ email });
+      const existingReferrer = await patientReferrer.findOne({ email });
 
       if (existingReferrer) {
         return res.status(409).json({
           success: false,
-          message: "Referrer with this email already exists",
+          message: "Patient Referrer with this email already exists",
         });
       }
-
-      const newReferrer = new Referrer({
+      const newReferrer = new patientReferrer({
         referredBy: userId,
-        type,
         name,
         number,
         email,
-        practiceName: practiceName || "",
-        practiceAddress: practiceAddress || "",
-        practiceType: practiceType || undefined,
         notes: notes || "",
       });
 
       const savedReferrer = await newReferrer.save();
-
-      const populatedReferrer = await Referrer.findById(savedReferrer._id)
-        .populate("referredBy", "name email")
-        .populate("practiceType", "name")
-        .exec();
-
       return res.status(201).json({
         success: true,
-        message: "Referrer added successfully",
-        data: populatedReferrer,
+        message: "Patient Referrer added successfully",
+        data: savedReferrer,
       });
     } catch (error: any) {
       return res.status(500).json({
@@ -66,22 +43,12 @@ export default {
       });
     }
   },
-  async updateReferrerDoctor(req: Request, res: Response) {
+  async updateReferrerPatient(req: Request, res: Response) {
     try {
       const { referrerId } = req.params;
-      const {
-        type,
-        name,
-        number,
-        email,
-        practiceName,
-        practiceAddress,
-        practiceType,
-        notes,
-        isActive,
-      } = req.body;
+      const { name, number, email, notes, isActive } = req.body;
 
-      const existingReferrer = await Referrer.findById(referrerId);
+      const existingReferrer = await patientReferrer.findById(referrerId);
       if (!existingReferrer) {
         return res.status(404).json({
           success: false,
@@ -90,7 +57,7 @@ export default {
       }
 
       if (email && email !== existingReferrer.email) {
-        const emailExists = await Referrer.findOne({
+        const emailExists = await patientReferrer.findOne({
           email,
           _id: { $ne: referrerId },
         });
@@ -98,34 +65,29 @@ export default {
         if (emailExists) {
           return res.status(409).json({
             success: false,
-            message: "Another referrer with this email already exists",
+            message: "Another Patient referrer with this email already exists",
           });
         }
       }
       const updateData: any = {};
 
-      if (type) updateData.type = type;
       if (name) updateData.name = name;
       if (number) updateData.number = number;
       if (email) updateData.email = email;
-      if (practiceName !== undefined) updateData.practiceName = practiceName;
-      if (practiceAddress !== undefined)
-        updateData.practiceAddress = practiceAddress;
-      if (practiceType !== undefined) updateData.practiceType = practiceType;
       if (notes !== undefined) updateData.notes = notes;
       if (isActive !== undefined) updateData.isActive = isActive;
 
-      const updatedReferrer = await Referrer.findByIdAndUpdate(
-        referrerId,
-        updateData,
-        { new: true, runValidators: true }
-      )
+      const updatedReferrer = await patientReferrer
+        .findByIdAndUpdate(referrerId, updateData, {
+          new: true,
+          runValidators: true,
+        })
         .populate("referredBy", "name email")
         .populate("practiceType", "name");
 
       return res.status(200).json({
         success: true,
-        message: "Referrer updated successfully",
+        message: "Patient Referrer updated successfully",
         data: updatedReferrer,
       });
     } catch (error: any) {
@@ -136,16 +98,21 @@ export default {
       });
     }
   },
-  async deleteReferredDoctor(req: Request, res: Response) {
+  async deleteReferredPatient(req: Request, res: Response) {
     try {
       const { referrerId } = req.params;
       if (!referrerId) {
-        return res.status(400).json({ message: "Referrer Id not found" });
+        return res.status(400).json({ message: "Referred Id not found" });
       }
-      const deletedUser = await Referrer.findByIdAndDelete(referrerId);
+      const deleteRefPatient = await patientReferrer.findByIdAndDelete(
+        referrerId
+      );
       return res
         .status(200)
-        .json({ message: "Referrer Id deleted", deletedUser });
+        .json({
+          message: "Referred Patient deleted successfully",
+          deleteRefPatient,
+        });
     } catch (error:any) {
       return res.status(500).json({
         success: false,

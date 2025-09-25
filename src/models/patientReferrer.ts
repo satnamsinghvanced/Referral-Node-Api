@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const referrerSchema = new Schema(
+const patientReferrerSchema = new Schema(
   {
     referredBy: {
       type: Schema.Types.ObjectId,
@@ -10,7 +10,7 @@ const referrerSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["doctor", "patient"],
+      default: "patient",
       index: true,
     },
 
@@ -30,19 +30,6 @@ const referrerSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-
-    practiceName: {
-      type: String,
-      trim: true,
-    },
-    practiceAddress: {
-      type: String,
-      trim: true,
-    },
-    practiceType: {
-      type: Schema.Types.ObjectId,
-    },
-
     notes: {
       type: String,
       trim: true,
@@ -52,10 +39,16 @@ const referrerSchema = new Schema(
       type: Boolean,
       default: true,
     },
+
+    status:{
+        type: String,
+        enum:["New", "Schedule", "Completed"],
+        default:"New"
+    }
   },
   { timestamps: true, strict: true }
 );
 
-const Referrer = mongoose.model("referrer", referrerSchema);
+const patientReferrer = mongoose.model("patientReferrer", patientReferrerSchema)
 
-export default Referrer;
+export default patientReferrer;
