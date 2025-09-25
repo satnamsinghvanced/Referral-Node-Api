@@ -1,188 +1,139 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import User from "../../models/user.js";
-import userMessage from "../../constant/userMessage.js";
+import User from "../../models/user.ts";
+import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
+import { USER_MESSAGE as UM } from "../../constant/userMessage.ts";
+import { generateAccessToken, generateRefreshToken } from "../../middleware/auth/tokenService.ts";
+import Subscription from "../../models/subscriptionSchema.ts";
+import getFileUrl from "../../helper/fileUrlHelper.ts"
+import PracticeType from "../../models/practiceType.ts";
+import { validateEntityById } from "../../utils/validateEntityById.ts";
+import { access } from "fs";
 
-const secretKey = process.env.JWT_SECRET || "testsecretkey";
-
-interface JwtPayload {
-  userId: string;
-  role: string;
-}
-
-export default {
-  async signup(req: Request, res: Response) {
+class UserController {
+  static async signup(req: Request, res: Response): Promise<Response> {
     try {
-      const {
-        firstName,
-        lastName,
-        email,
-        password,
-        mobile,
-        practiceName,
-        role,
-        medicalSpecialty,
-      } = req.body;
+      const subscription = await validateEntityById(Subscription, req.body.subscriptionId, res, UM.VALIDATION.INVALID_SUBSCRIPTION);
+      if (!subscription) return res;
 
-      const existingUser = await User.findOne({ email });
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const newUser = await User.create({
-        firstName,
-        lastName,
-        email,
+      const medicalSpecialty = await validateEntityById(PracticeType, req.body.medicalSpecialtyId, res, UM.VALIDATION.INVALID_MEDICAL_SPECIALITY);
+      if (!medicalSpecialty) return res;
+      const hashedPassword = await bcrypt.hash(req.body.password, 10);
+      const image = getFileUrl(req.file);
+      const user = new User({
+        ...req.body,
         password: hashedPassword,
-        mobile,
-        practiceName,
-        role,
-        medicalSpecialty,
         status: "pending",
+        subscriptionId: subscription._id,
+        role: req.body.role || "admin",
+        image,
+        medicalSpecialty: medicalSpecialty._id,
+        access: true
       });
-
-      return res
-        .status(200)
-        .json({ message: userMessage.success.userRegistered, data: newUser });
-    } catch (error) {
-      return res.status(500).json({ message: userMessage.serverError });
+      await user.save();
+      return sendSuccess(res, UM.SUCCESS.USER_REGISTERED, user, 201);
+    } catch (error: any) {
+      if (error.code === 11000 && error.keyPattern?.email) {
+        return sendError(res, UM.VALIDATION.USER_EXISTS, UM.VALIDATION.SOMETHING_WRONG_ERROR, 409);
+      }
+      return sendError(res, UM.SERVER_ERROR, error.message);
     }
-  },
-  async login(req: Request, res: Response) {
-    try {
-      const { email, password } = req.body;
+  }
 
-      const user = (await User.findOne({ email })
-        .select("+password")
-        .lean()) as typeof User extends { prototype: infer U }
-        ? U & { password?: string }
-        : any;
+  static async login(req: Request, res: Response): Promise<Response> {
+    try {
+      const { email, password, rememberMe } = req.body;
+      const user = await User.findOne({ email }).select("+password");
+      if (!user) return sendError(res, UM.VALIDATION.INVALID_CREDENTIALS);
+      const validPass = await bcrypt.compare(password, user.password);
+      if (!validPass) return sendError(res, UM.VALIDATION.INVALID_CREDENTIALS);
+      const payload = { userId: user._id.toString(), role: user.role };
+      const accessToken = generateAccessToken(payload, rememberMe);
+      const refreshToken = generateRefreshToken(payload, rememberMe);
+      user.refreshToken = refreshToken;
+      await user.save();
+      const { password: _, ...userData } = user.toObject();
+      return sendSuccess(res, UM.SUCCESS.LOGIN_SUCCESS, { user: userData, accessToken });
+    } catch (error: any) {
+      return sendError(res, UM.SERVER_ERROR, error.message);
+    }
+  }
+
+  static async getAllUser(req: Request, res: Response): Promise<Response> {
+    try {
+      const users = await User.find().select("-password").populate("practiceType").populate("Subscription").populate("Payment");
+      return sendSuccess(res, UM.SUCCESS.ALL_USERS_FETCHED, users || []);
+    } catch (error: any) {
+      return sendError(res, UM.SERVER_ERROR, error.message);
+    }
+  }
+
+  static async getUserById(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = await User.findById(req.params.id).select("-password");
       if (!user) {
-        return res
-          .status(404)
-          .json({ message: userMessage.validation.userNotFound });
+        return sendError(res, UM.VALIDATION.USER_NOT_FOUND);
       }
-
-      if (!user.password) {
-        return res
-          .status(400)
-          .json({ message: userMessage.validation.invalidCredentials });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password as string);
-      if (!isMatch) {
-        return res
-          .status(400)
-          .json({ message: userMessage.validation.invalidCredentials });
-      }
-
-      const payload: JwtPayload = {
-        userId: user._id.toString(),
-        role: Array.isArray(user.role) ? user.role[0] : user.role,
-      };
-
-      const token = jwt.sign(payload, secretKey);
-
-      delete user.password;
-
-      return res.status(200).json({
-        message: userMessage.success.loginSuccess,
-        data: user,
-        token,
-      });
+      return sendSuccess(res, UM.SUCCESS.USER_FETCHED, user);
     } catch (error: any) {
-      return res.status(500).json({
-        message: userMessage.serverError,
-        error: error.message,
-      });
+      return sendError(res, UM.SERVER_ERROR, error.message);
     }
-  },
+  }
 
-  async getAllUser(req: Request, res: Response) {
+  static async updateUser(req: Request, res: Response): Promise<Response> {
     try {
-      const users = await User.find().select("-password");
-      return res.status(200).json({
-        message: userMessage.success.allUsersFetched,
-        data: users,
-      });
-    } catch (error: any) {
-      return res
-        .status(500)
-        .json({ message: userMessage.serverError, error: error.message });
-    }
-  },
-  async getUserById(req: Request, res: Response) {
-    try {
-      const {id} = req.params;
-
-      if (!id) {
-        return res
-          .status(400)
-          .json({ message: userMessage.validation.userIdRequired });
+      const updateData = { ...req.body };
+      if ('email' in updateData) {
+        delete updateData.email;
       }
-
-      const user = await User.findById(id).select("-password");
-
-      if (!user) {
-        return res
-          .status(404)
-          .json({ message: userMessage.validation.userNotFound });
+      if (updateData.password) {
+        updateData.password = await bcrypt.hash(updateData.password, 10);
       }
-
-      return res
-        .status(200)
-        .json({ message: userMessage.success.userFetched, data: user });
-    } catch (error: any) {
-      return res
-        .status(500)
-        .json({ message: userMessage.serverError, error: error.message });
-    }
-  },
-  async updateUser(req: Request, res: Response) {
-    try {
-      const {id} = req.params;
-      const updateFields = req.body;
-
-      if (updateFields.password) {
-        updateFields.password = await bcrypt.hash(updateFields.password, 10);
+      if (req.file) {
+        updateData.image = getFileUrl(req.file);
       }
-
-      const updatedUser = await User.findByIdAndUpdate(id, updateFields, {
+      const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, {
         new: true,
+        runValidators: true,
+        context: "query",
       }).select("-password");
 
       if (!updatedUser) {
-        return res
-          .status(404)
-          .json({ message: userMessage.validation.userNotFound });
+        return sendError(res, UM.VALIDATION.USER_NOT_FOUND);
       }
-
-      return res
-        .status(200)
-        .json({ message: userMessage.success.userUpdated, data: updatedUser });
+      return sendSuccess(res, UM.SUCCESS.USER_UPDATED, updatedUser);
     } catch (error: any) {
-      return res
-        .status(500)
-        .json({ message: userMessage.serverError, error: error.message });
+      if (error.code === 11000) {
+        return sendError(res, UM.VALIDATION.USER_EXISTS, undefined, 409);
+      }
+      return sendError(res, UM.SERVER_ERROR, error.message);
     }
-  },
-  async deleteUser(req: Request, res: Response) {
+  }
+
+  static async deleteUser(req: Request, res: Response): Promise<Response> {
     try {
-      const {id} = req.params;
-      const deletedUser = await User.findByIdAndDelete(id);
-
+      const deletedUser = await User.findByIdAndDelete(req.params.id);
       if (!deletedUser) {
-        return res
-          .status(404)
-          .json({ message: userMessage.validation.userNotFound });
+        return sendError(res, UM.VALIDATION.USER_NOT_FOUND);
       }
-      return res
-        .status(200)
-        .json({ message: userMessage.success.userDeleted, data: deletedUser });
+      return sendSuccess(res, UM.SUCCESS.USER_DELETED);
     } catch (error: any) {
-      return res
-        .status(500)
-        .json({ message: userMessage.serverError, error: error.message });
+      return sendError(res, UM.SERVER_ERROR, error.message);
     }
-  },
-};
+  }
+
+  static async logout(req: Request, res: Response): Promise<Response> {
+    try {
+      const userId = req.params.id;
+      const user = await User.findById(userId);
+      if (!user) return sendError(res, UM.VALIDATION.USER_NOT_FOUND);
+      user.refreshToken = undefined;
+      await user.save();
+      return sendSuccess(res, UM.SUCCESS.LOGOUT_SUCCESS);
+    } catch (error: any) {
+      return sendError(res, UM.SERVER_ERROR, error.message);
+    }
+  }
+}
+
+export default UserController;

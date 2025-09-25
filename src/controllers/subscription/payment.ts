@@ -3,6 +3,8 @@ import Payment from "../../models/payment.ts";
 import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
 import { CONTROLLER_MESSAGES as CM } from "../../constant/payment.ts";
 import stripe from "../../config/stripe.ts";
+import User from "../../models/user.ts";
+
 class PaymentController {
   static async getAll(req: Request, res: Response): Promise<Response> {
     try {
@@ -48,6 +50,9 @@ class PaymentController {
           status: "succeeded",
           transactionId: paymentIntent.id,
         });
+        if (userId) {
+          await User.findByIdAndUpdate(userId, { paymentId: payment._id, status: "active" });
+        }
         return sendSuccess(res, CM.PAYMENT_CREATE_SUCCESS, payment, 201);
 
       } else if (paymentIntent.status === "requires_action" || paymentIntent.status === "requires_confirmation") {

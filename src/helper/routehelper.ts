@@ -3,6 +3,12 @@ const COMMON_ROUTES = {
   ID_PARAM: "/:id"
 };
 
+const AUTH_ROUTE = {
+  LOGIN: "/login",
+  SIGN_IN: "/register",
+  LOGOUT: `/logout${COMMON_ROUTES.ID_PARAM}`
+}
+
 const ROUTES = {
   USERS: "/users",
   SUBSCRIPTIONS: "/subscriptions",
@@ -10,9 +16,7 @@ const ROUTES = {
   PAYMENTS: "/payment",
   PERMISSION: "/permission",
   PRACTICE_TYPE: "/practice",
-  DOC_REFERRER: "/docReferrer",
-  PAT_REFERRER: "/patientReferrer"
+  REFERRER: "/referrer",
 };
 
-
-export { COMMON_ROUTES, ROUTES };
+export { COMMON_ROUTES, ROUTES, AUTH_ROUTE };
