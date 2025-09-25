@@ -1,23 +1,22 @@
 import { Request, Response } from "express";
 import docReferrer from "../../models/docReferrer.ts";
 import QRCode from "qrcode";
+import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
+import { DOC_REFERRER_MESSAGES } from "../../constant/docReferrer.ts"; // You can create this constants file similar to ROLE_MESSAGES
 
 export default {
-  async getDocReferrer(req: Request, res: Response) {
+  async getDocReferrer(req: Request, res: Response): Promise<Response> {
     try {
-      const getDocRef = await docReferrer.find();
-      return res.status(200).json({ message: "All Referrer doctors",getDocRef });
+      const referrers = await docReferrer.find();
+      return sendSuccess(res, DOC_REFERRER_MESSAGES.FETCH_ALL_SUCCESS, referrers);
     } catch (error: any) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Internal error" });
-        
+      return sendError(res, DOC_REFERRER_MESSAGES.SERVER_ERROR, error.message);
     }
   },
-  async addReferrerDoctor(req: Request, res: Response) {
-    try {
-      const { userId } = req.params;
 
+  async addReferrerDoctor(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
       const {
         name,
         number,
@@ -29,23 +28,16 @@ export default {
       } = req.body;
 
       if (!name || !number || !email) {
-        return res.status(400).json({
-          success: false,
-          message: "Type, name, number, and email are required",
-        });
+        return sendError(res, DOC_REFERRER_MESSAGES.REQUIRED_FIELDS);
       }
 
       const existingReferrer = await docReferrer.findOne({ email });
-
       if (existingReferrer) {
-        return res.status(409).json({
-          success: false,
-          message: "Doctor Referrer with this email already exists",
-        });
+        return sendError(res, DOC_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, undefined, 409);
       }
 
       const newReferrer = new docReferrer({
-        referredBy: userId,
+        referredBy: id,
         name,
         number,
         email,
@@ -55,7 +47,7 @@ export default {
         notes: notes || "",
       });
 
-      const savedReferrer = await newReferrer.save();
+    const savedReferrer = await newReferrer.save();
       const qrCodeDataUrl = await QRCode.toDataURL(
         JSON.stringify("https://practicemarketer.ai/referral/general")
       );
@@ -69,22 +61,15 @@ export default {
         .populate("practiceType", "name")
         .exec();
 
-      return res.status(201).json({
-        success: true,
-        message: "Doctor Referrer added successfully",
-        data: populatedReferrer,
-      });
+      return sendSuccess(res, DOC_REFERRER_MESSAGES.CREATED_MESSAGE, populatedReferrer, 201);
     } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return sendError(res, DOC_REFERRER_MESSAGES.SERVER_ERROR, error.message);
     }
   },
-  async updateReferrerDoctor(req: Request, res: Response) {
+
+  async updateReferrerDoctor(req: Request, res: Response): Promise<Response> {
     try {
-      const { referrerId } = req.params;
+      const { id } = req.params;
       const {
         name,
         number,
@@ -96,78 +81,58 @@ export default {
         isActive,
       } = req.body;
 
-      const existingReferrer = await docReferrer.findById(referrerId);
+      const existingReferrer = await docReferrer.findById(id);
       if (!existingReferrer) {
-        return res.status(404).json({
-          success: false,
-          message: "Referrer not found",
-        });
+        return sendError(res, DOC_REFERRER_MESSAGES.NOT_FOUND);
       }
 
       if (email && email !== existingReferrer.email) {
         const emailExists = await docReferrer.findOne({
           email,
-          _id: { $ne: referrerId },
+          _id: { $ne: id },
         });
-
         if (emailExists) {
-          return res.status(409).json({
-            success: false,
-            message: "Another doctor referrer with this email already exists",
-          });
+          return sendError(res, DOC_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, undefined, 409);
         }
       }
-      const updateData: any = {};
 
+      const updateData: any = {};
       if (name) updateData.name = name;
       if (number) updateData.number = number;
       if (email) updateData.email = email;
       if (practiceName !== undefined) updateData.practiceName = practiceName;
-      if (practiceAddress !== undefined)
-        updateData.practiceAddress = practiceAddress;
+      if (practiceAddress !== undefined) updateData.practiceAddress = practiceAddress;
       if (practiceType !== undefined) updateData.practiceType = practiceType;
       if (notes !== undefined) updateData.notes = notes;
       if (isActive !== undefined) updateData.isActive = isActive;
 
       const updatedReferrer = await docReferrer
-        .findByIdAndUpdate(referrerId, updateData, {
+        .findByIdAndUpdate(id, updateData, {
           new: true,
           runValidators: true,
         })
         .populate("referredBy", "name email")
         .populate("practiceType", "name");
 
-      return res.status(200).json({
-        success: true,
-        message: "Doctor Referrer updated successfully",
-        data: updatedReferrer,
-      });
+      return sendSuccess(res, DOC_REFERRER_MESSAGES.UPDATED_MESSAGE, updatedReferrer);
     } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return sendError(res, DOC_REFERRER_MESSAGES.SERVER_ERROR, error.message);
     }
   },
-  async deleteReferredDoctor(req: Request, res: Response) {
+
+  async deleteReferredDoctor(req: Request, res: Response): Promise<Response> {
     try {
-      const { referrerId } = req.params;
-      if (!referrerId) {
-        return res
-          .status(400)
-          .json({ message: "Doctor Referrer Id not found" });
+      const { id } = req.params;
+      if (!id) {
+        return sendError(res, DOC_REFERRER_MESSAGES.MISSING_ID);
       }
-      const deletedUser = await docReferrer.findByIdAndDelete(referrerId);
-      return res
-        .status(200)
-        .json({ message: "Doctor Referrer Id deleted", deletedUser });
+      const deletedUser = await docReferrer.findByIdAndDelete(id);
+      if (!deletedUser) {
+        return sendError(res, DOC_REFERRER_MESSAGES.NOT_FOUND);
+      }
+      return sendSuccess(res, DOC_REFERRER_MESSAGES.DELETED_MESSAGE,deletedUser);
     } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return sendError(res, DOC_REFERRER_MESSAGES.SERVER_ERROR, error.message);
     }
   },
 };

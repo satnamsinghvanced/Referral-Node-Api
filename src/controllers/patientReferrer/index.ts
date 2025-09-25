@@ -1,28 +1,27 @@
 import { Request, Response } from "express";
 import patientReferrer from "../../models/patientReferrer.ts";
+import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
+import { PATIENT_REFERRER_MESSAGES } from "../../constant/patientReferrer.ts";
 
 export default {
-  async addReferrerPatient(req: Request, res: Response) {
+  async addReferrerPatient(req: Request, res: Response): Promise<Response> {
     try {
-      const { userId } = req.params;
-
+      const { id } = req.params;
+      console.log("referredId",id);
+      
       const { name, number, email, notes } = req.body;
-      if (!name || !number || !email) {
-        return res.status(400).json({
-          success: false,
-          message: "Type, name, number, and email are required",
-        });
-      }
-      const existingReferrer = await patientReferrer.findOne({ email });
 
-      if (existingReferrer) {
-        return res.status(409).json({
-          success: false,
-          message: "Patient Referrer with this email already exists",
-        });
+      if (!name || !number || !email) {
+        return sendError(res, PATIENT_REFERRER_MESSAGES.MISSING_FIELDS, undefined, 400);
       }
+
+      const existingReferrer = await patientReferrer.findOne({ email });
+      if (existingReferrer) {
+        return sendError(res, PATIENT_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, undefined, 409);
+      }
+
       const newReferrer = new patientReferrer({
-        referredBy: userId,
+        referredBy: id,
         name,
         number,
         email,
@@ -30,47 +29,33 @@ export default {
       });
 
       const savedReferrer = await newReferrer.save();
-      return res.status(201).json({
-        success: true,
-        message: "Patient Referrer added successfully",
-        data: savedReferrer,
-      });
+      return sendSuccess(res, PATIENT_REFERRER_MESSAGES.CREATED, savedReferrer, 201);
     } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return sendError(res, PATIENT_REFERRER_MESSAGES.SERVER_ERROR, error.message);
     }
   },
-  async updateReferrerPatient(req: Request, res: Response) {
+
+  async updateReferrerPatient(req: Request, res: Response): Promise<Response> {
     try {
-      const { referrerId } = req.params;
+      const { id } = req.params;
       const { name, number, email, notes, isActive } = req.body;
 
-      const existingReferrer = await patientReferrer.findById(referrerId);
+      const existingReferrer = await patientReferrer.findById(id);
       if (!existingReferrer) {
-        return res.status(404).json({
-          success: false,
-          message: "Referrer not found",
-        });
+        return sendError(res, PATIENT_REFERRER_MESSAGES.NOT_FOUND, undefined, 404);
       }
 
       if (email && email !== existingReferrer.email) {
         const emailExists = await patientReferrer.findOne({
           email,
-          _id: { $ne: referrerId },
+          _id: { $ne: id },
         });
-
         if (emailExists) {
-          return res.status(409).json({
-            success: false,
-            message: "Another Patient referrer with this email already exists",
-          });
+          return sendError(res, PATIENT_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, undefined, 409);
         }
       }
-      const updateData: any = {};
 
+      const updateData: any = {};
       if (name) updateData.name = name;
       if (number) updateData.number = number;
       if (email) updateData.email = email;
@@ -78,47 +63,63 @@ export default {
       if (isActive !== undefined) updateData.isActive = isActive;
 
       const updatedReferrer = await patientReferrer
-        .findByIdAndUpdate(referrerId, updateData, {
+        .findByIdAndUpdate(id, updateData, {
           new: true,
           runValidators: true,
         })
         .populate("referredBy", "name email")
         .populate("practiceType", "name");
 
-      return res.status(200).json({
-        success: true,
-        message: "Patient Referrer updated successfully",
-        data: updatedReferrer,
-      });
+      return sendSuccess(res, PATIENT_REFERRER_MESSAGES.UPDATED, updatedReferrer);
     } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+      return sendError(res, PATIENT_REFERRER_MESSAGES.SERVER_ERROR, error.message);
     }
   },
-  async deleteReferredPatient(req: Request, res: Response) {
+
+  async deleteReferrerPatient(req: Request, res: Response): Promise<Response> {
     try {
-      const { referrerId } = req.params;
-      if (!referrerId) {
-        return res.status(400).json({ message: "Referred Id not found" });
+      const { id } = req.params;
+      if (!id) {
+        return sendError(res, PATIENT_REFERRER_MESSAGES.MISSING_ID, undefined, 400);
       }
-      const deleteRefPatient = await patientReferrer.findByIdAndDelete(
-        referrerId
-      );
-      return res
-        .status(200)
-        .json({
-          message: "Referred Patient deleted successfully",
-          deleteRefPatient,
-        });
-    } catch (error:any) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
+
+      const deletedReferrer = await patientReferrer.findByIdAndDelete(id);
+      if (!deletedReferrer) {
+        return sendError(res, PATIENT_REFERRER_MESSAGES.NOT_FOUND, undefined, 404);
+      }
+
+      return sendSuccess(res, PATIENT_REFERRER_MESSAGES.DELETED);
+    } catch (error: any) {
+      return sendError(res, PATIENT_REFERRER_MESSAGES.SERVER_ERROR, error.message);
+    }
+  },
+
+  async getReferrerPatients(req: Request, res: Response): Promise<Response> {
+    try {
+      const referrers = await patientReferrer.find()
+        .populate("referredBy", "name email")
+        .populate("practiceType", "name");
+
+      return sendSuccess(res, PATIENT_REFERRER_MESSAGES.FETCH_ALL_SUCCESS, referrers);
+    } catch (error: any) {
+      return sendError(res, PATIENT_REFERRER_MESSAGES.SERVER_ERROR, error.message);
+    }
+  },
+
+  async getReferrerPatient(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const referrer = await patientReferrer.findById(id)
+        .populate("referredBy", "name email")
+        .populate("practiceType", "name");
+
+      if (!referrer) {
+        return sendError(res, PATIENT_REFERRER_MESSAGES.NOT_FOUND, undefined, 404);
+      }
+
+      return sendSuccess(res, PATIENT_REFERRER_MESSAGES.FETCH_ONE_SUCCESS, referrer);
+    } catch (error: any) {
+      return sendError(res, PATIENT_REFERRER_MESSAGES.SERVER_ERROR, error.message);
     }
   },
 };
