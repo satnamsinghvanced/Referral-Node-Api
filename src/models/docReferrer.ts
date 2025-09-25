@@ -4,6 +4,7 @@ const docReferrerSchema = new Schema(
   {
     referredBy: {
       type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
       index: true,
     },
@@ -41,6 +42,7 @@ const docReferrerSchema = new Schema(
     },
     practiceType: {
       type: Schema.Types.ObjectId,
+      ref: "practiceType"
     },
 
     notes: {

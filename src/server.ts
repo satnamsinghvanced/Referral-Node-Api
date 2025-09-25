@@ -5,9 +5,11 @@ import ConnectDB from "./config/db.ts";
 import corsMiddleware from "./config/index.ts";
 import router from "./routes/routes.ts";
 import path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
 
+const __dirname = path.dirname(__filename);
 const app = express();
 const { SERVER_RUNNING, HEALTH_ROUTE_OK } = main;
 const __filename = fileURLToPath(import.meta.url);

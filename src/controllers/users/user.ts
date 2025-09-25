@@ -13,8 +13,8 @@ import { paginate } from "../../utils/pagination.ts";
 class UserController {
   static async signup(req: Request, res: Response): Promise<Response> {
     try {
-      const subscription = await validateEntityById(Subscription, req.body.subscriptionId, res, UM.VALIDATION.INVALID_SUBSCRIPTION);
-      if (!subscription) return res;
+        const subscription = await validateEntityById(Subscription, req.body.subscriptionId, res, UM.VALIDATION.INVALID_SUBSCRIPTION);
+        if (!subscription) return res;
 
       const medicalSpecialty = await validateEntityById(PracticeType, req.body.medicalSpecialtyId, res, UM.VALIDATION.INVALID_MEDICAL_SPECIALITY);
       if (!medicalSpecialty) return res;

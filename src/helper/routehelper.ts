@@ -1,3 +1,5 @@
+import { PATIENT_REFERRER_MESSAGES } from "../constant/patientReferrer";
+
 const COMMON_ROUTES = {
   ROOT: "/",
   ID_PARAM: "/:id"
@@ -17,7 +19,8 @@ const ROUTES = {
   PAYMENTS: "/payment",
   PERMISSION: "/permission",
   PRACTICE_TYPE: "/practice",
-  REFERRER: "/referrer",
+  DOC_REFERRER: "/docReferrer",
+  PAT_REFERRER: "/patientReferrer"
 };
 
 export { COMMON_ROUTES, ROUTES, AUTH_ROUTE };
