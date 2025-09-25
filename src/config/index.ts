@@ -4,13 +4,13 @@ import { main } from "../constant/main.ts";
 import dotenv from "dotenv";
 dotenv.config();
 
-const { base_URL } = process.env;
+const { FRONTEND_URL } = process.env;
 const { CORS_NOT_ALLOWED } = main;
 
 const normalizeOrigin = (url: string): string => url.replace(/\/$/, "");
 
-const allowedOrigins: string[] = base_URL
-  ? [normalizeOrigin(base_URL)]
+const allowedOrigins: string[] = FRONTEND_URL
+  ? [normalizeOrigin(FRONTEND_URL)]
   : [];
 
 const corsOptions: CorsOptions = {

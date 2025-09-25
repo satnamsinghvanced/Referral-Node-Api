@@ -8,7 +8,7 @@ import Subscription from "../../models/subscriptionSchema.ts";
 import getFileUrl from "../../helper/fileUrlHelper.ts"
 import PracticeType from "../../models/practiceType.ts";
 import { validateEntityById } from "../../utils/validateEntityById.ts";
-import { access } from "fs";
+import { paginate } from "../../utils/pagination.ts";
 
 class UserController {
   static async signup(req: Request, res: Response): Promise<Response> {
@@ -34,7 +34,7 @@ class UserController {
       return sendSuccess(res, UM.SUCCESS.USER_REGISTERED, user, 201);
     } catch (error: any) {
       if (error.code === 11000 && error.keyPattern?.email) {
-        return sendError(res, UM.VALIDATION.USER_EXISTS, UM.VALIDATION.SOMETHING_WRONG_ERROR, 409);
+        return sendError(res, UM.VALIDATION.VALIDATION_ERROR, UM.VALIDATION.USER_EXISTS, 404);
       }
       return sendError(res, UM.SERVER_ERROR, error.message);
     }
@@ -47,7 +47,7 @@ class UserController {
       if (!user) return sendError(res, UM.VALIDATION.INVALID_CREDENTIALS);
       const validPass = await bcrypt.compare(password, user.password);
       if (!validPass) return sendError(res, UM.VALIDATION.INVALID_CREDENTIALS);
-      const payload = { userId: user._id.toString(), role: user.role };
+      const payload = { userId: user._id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName, email: user.email };
       const accessToken = generateAccessToken(payload, rememberMe);
       const refreshToken = generateRefreshToken(payload, rememberMe);
       user.refreshToken = refreshToken;
@@ -59,14 +59,20 @@ class UserController {
     }
   }
 
+
   static async getAllUser(req: Request, res: Response): Promise<Response> {
     try {
-      const users = await User.find().select("-password").populate("practiceType").populate("Subscription").populate("Payment");
-      return sendSuccess(res, UM.SUCCESS.ALL_USERS_FETCHED, users || []);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const paginationResult = await paginate(User, page, limit, {},
+        ["medicalSpecialty", "subscriptionId", "paymentId"]
+      );
+      return sendSuccess(res, UM.SUCCESS.ALL_USERS_FETCHED, paginationResult);
     } catch (error: any) {
       return sendError(res, UM.SERVER_ERROR, error.message);
     }
   }
+
 
   static async getUserById(req: Request, res: Response): Promise<Response> {
     try {
@@ -127,6 +133,7 @@ class UserController {
       const userId = req.params.id;
       const user = await User.findById(userId);
       if (!user) return sendError(res, UM.VALIDATION.USER_NOT_FOUND);
+      if (!user.refreshToken) return sendError(res, UM.VALIDATION.TOKEN_ERROR)
       user.refreshToken = undefined;
       await user.save();
       return sendSuccess(res, UM.SUCCESS.LOGOUT_SUCCESS);

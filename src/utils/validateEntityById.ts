@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { sendError } from "../helper/responseHelpers";
+import { sendError } from "../helper/responseHelpers.ts";
 import { Document } from "mongoose";
 
 export async function validateEntityById<T extends Document>(

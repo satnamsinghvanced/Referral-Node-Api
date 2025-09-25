@@ -5,8 +5,9 @@ const COMMON_ROUTES = {
 
 const AUTH_ROUTE = {
   LOGIN: "/login",
-  SIGN_IN: "/register",
-  LOGOUT: `/logout${COMMON_ROUTES.ID_PARAM}`
+  REGISTER: "/register",
+  LOGOUT: `/logout${COMMON_ROUTES.ID_PARAM}`,
+  REFRESH_TOKEN: `/token`
 }
 
 const ROUTES = {
