@@ -36,6 +36,7 @@ class Permission {
     }
   }
 
+
   static async update(req: Request, res: Response): Promise<Response> {
     try {
       const updatedPermission = await Permissions.findByIdAndUpdate(

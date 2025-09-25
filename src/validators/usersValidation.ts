@@ -1,59 +1,67 @@
 import Joi from "joi";
+import { USER_VALIDATION_MESSAGES as UM } from "../constant/userMessage.ts";
+
+const nameRegex = /^[A-Za-z\s]+$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const signupSchema = Joi.object({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-  mobile: Joi.string().required(),
-  practiceName: Joi.string().optional(),
-  role: Joi.string().required(),
-  medicalSpecialty: Joi.array()
-    .items(
-      Joi.string().valid(
-        "orthodontics",
-        "generalDentistry",
-        "OralSurgery",
-        "endodontics",
-        "periodontics",
-        "other"
-      )
-    )
-    .required(),
+  firstName: Joi.string()
+    .pattern(nameRegex)
+    .required()
+    .messages(UM.FIRST_NAME),
+
+  lastName: Joi.string()
+    .pattern(nameRegex)
+    .required()
+    .messages(UM.LAST_NAME),
+
+  email: Joi.string()
+    .pattern(emailRegex)
+    .required()
+    .messages(UM.EMAIL),
+
+  password: Joi.string()
+    .min(6)
+    .required()
+    .messages(UM.PASSWORD),
+
+  mobile: Joi.string()
+    .required()
+    .messages(UM.MOBILE),
+
+  practiceName: Joi.string()
+    .optional()
+    .messages(UM.PRACTICE_NAME),
+
+  role: Joi.string()
+    .required()
+    .messages(UM.ROLE),
+
+  medicalSpecialty: Joi.string()
+    .required()
+    .messages(UM.MEDICAL_SPECIALTY),
 });
+
 
 export const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
+  email: Joi.string()
+    .pattern(emailRegex)
+    .required()
+    .messages(UM.EMAIL),
+
+  password: Joi.string()
+    .required()
+    .messages(UM.PASSWORD),
 });
+
 
 export const updateUserSchema = Joi.object({
-  firstName: Joi.string().optional(),
-  lastName: Joi.string().optional(),
-  email: Joi.string().email().optional(),
-  password: Joi.string().min(6).optional(),
-  mobile: Joi.string().optional(),
-  practiceName: Joi.string().optional(),
-  role: Joi.string().optional(),
-  medicalSpecialty: Joi.array()
-    .items(
-      Joi.string().valid(
-        "orthodontics",
-        "generalDentistry",
-        "OralSurgery",
-        "endodontics",
-        "periodontics",
-        "other"
-      )
-    )
-    .optional(),
-});
-
-export const userIdParamSchema = Joi.object({
-  userId: Joi.string().length(24).hex().required().messages({
-    "string.base": `"userId" should be a type of 'text'`,
-    "string.length": `"userId" must be 24 characters long`,
-    "string.hex": `"userId" must only contain hexadecimal characters`,
-    "any.required": `"userId" is a required field`,
-  }),
+  firstName: Joi.string().pattern(nameRegex).optional().messages(UM.FIRST_NAME),
+  lastName: Joi.string().pattern(nameRegex).optional().messages(UM.LAST_NAME),
+  email: Joi.string().pattern(emailRegex).optional().messages(UM.EMAIL),
+  password: Joi.string().min(6).optional().messages(UM.PASSWORD),
+  mobile: Joi.string().optional().messages(UM.MOBILE),
+  practiceName: Joi.string().optional().messages(UM.PRACTICE_NAME),
+  role: Joi.string().optional().messages(UM.ROLE),
+  medicalSpecialty: Joi.string().optional().messages(UM.MEDICAL_SPECIALTY),
 });

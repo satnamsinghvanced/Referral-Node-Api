@@ -16,6 +16,7 @@ export default {
       return sendError(res, ROLE_MESSAGES.SERVER_ERROR, error.message);
     }
   },
+
   async updateRole(req: Request, res: Response): Promise<Response> {
     try {
       const updatedRole = await Role.findByIdAndUpdate(req.params.id, req.body, {
@@ -34,7 +35,6 @@ export default {
     }
   },
 
-
   async deleteRole(req: Request, res: Response): Promise<Response> {
     try {
       const deletedRole = await Role.findByIdAndDelete(req.params.id);
@@ -47,7 +47,6 @@ export default {
     }
   },
 
-
   async getAll(req: Request, res: Response): Promise<Response> {
     try {
       const roles = await Role.find().populate("permissions");
@@ -56,7 +55,6 @@ export default {
       return sendError(res, ROLE_MESSAGES.SERVER_ERROR, error.message);
     }
   },
-
 
   async get(req: Request, res: Response): Promise<Response> {
     try {
