@@ -13,7 +13,8 @@ const USER_MESSAGE = {
     SOMETHING_WRONG_ERROR: 'Something went wrong please try again!',
     INVALID_SUBSCRIPTION: "Subscription not found in database!",
     INVALID_PAYMENT: "Payment details not found in database!",
-    INVALID_MEDICAL_SPECIALITY: "Medicial speciality not found in database!"
+    INVALID_MEDICAL_SPECIALITY: "Medicial speciality not found in database!",
+    TOKEN_ERROR: "User already logout"
   },
   AUTH: {
     NO_TOKEN: "No token provided.",
@@ -74,6 +75,12 @@ const USER_VALIDATION_MESSAGES = {
     "string.empty": "Medical specialty is required",
     "any.required": "Medical specialty is required",
   },
+  TERM_CONDITION_ERROR: {
+    "boolean.base": "Terms Accepted must be true or false."
+  },
+  SUBSCRIPTION_ERROR: {
+    "string.base": "Subscription ID must be a string."
+  }
 };
 
 export { USER_VALIDATION_MESSAGES, USER_MESSAGE };

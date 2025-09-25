@@ -9,4 +9,5 @@ export const AUTH = {
   UNAUTHORIZED: "Authorization token is missing or malformed",
   INVALID_TOKEN: "Invalid access token",
   ACCESS_EXPIRED: "Access token has expired",
+  REFRESH_TOKEN_EXPIRED: "Refresh token expired, please login again.",
 } 

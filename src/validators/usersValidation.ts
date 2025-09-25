@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { USER_VALIDATION_MESSAGES as UM } from "../constant/userMessage.ts";
 
-const nameRegex = /^[A-Za-z\s]+$/;
+const nameRegex = /^[A-Za-z\s.]+$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const signupSchema = Joi.object({
@@ -37,9 +37,17 @@ export const signupSchema = Joi.object({
     .required()
     .messages(UM.ROLE),
 
-  medicalSpecialty: Joi.string()
-    .required()
+  subscriptionId: Joi.string()
+    .optional()
+    .messages(UM.SUBSCRIPTION_ERROR),
+
+  medicalSpecialtyId: Joi.string()
+    .optional()
     .messages(UM.MEDICAL_SPECIALTY),
+
+  termsAccepted: Joi.boolean()
+    .optional()
+    .messages(UM.TERM_CONDITION_ERROR),
 });
 
 
@@ -52,6 +60,7 @@ export const loginSchema = Joi.object({
   password: Joi.string()
     .required()
     .messages(UM.PASSWORD),
+  rememberMe: Joi.boolean().optional()
 });
 
 
