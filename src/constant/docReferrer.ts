@@ -11,3 +11,23 @@ export const DOC_REFERRER_MESSAGES = {
   SERVER_ERROR: "Internal server error",
   MISSING_ID: "Invalid ID"
 };
+
+export const DOCTOR_REFERRER_VALIDATION = {
+  NAME: {
+    "string.empty": `"name" is required`,
+  },
+  NUMBER: {
+    "string.empty": `"number" is required`,
+  },
+  EMAIL: {
+    "string.empty": `"email" is required`,
+    "string.email": `"email" must be a valid email`,
+  },
+  PRACTICE_TYPE: {
+    "any.required": `"practiceType" is required`,
+    "string.empty": `"practiceType" cannot be empty`,
+  },
+  EMAIL_OPTIONAL: {
+    "string.email": `"email" must be a valid email`,
+  }
+};

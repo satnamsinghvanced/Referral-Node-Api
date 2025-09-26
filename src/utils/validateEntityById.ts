@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { sendError } from "../helper/responseHelpers.ts";
-import { Document } from "mongoose";
+import { sendError, sendSuccess } from "../helper/responseHelpers.ts";
+import { Document, Model } from "mongoose";
 
 export async function validateEntityById<T extends Document>(
   model: { findById(id: string): Promise<T | null> },
@@ -21,3 +21,22 @@ export async function validateEntityById<T extends Document>(
 
   return entity;
 }
+
+
+export async function deleteById<T extends Document>(
+  model: Model<any>,
+  id: string,
+  res: Response,
+  notFoundMessage: string,
+  deletedMessage: string
+): Promise<Response> {
+  try {
+    const deletedDoc = await model.findByIdAndDelete(id);
+    if (!deletedDoc) {
+      return sendError(res, notFoundMessage, undefined, 404);
+    }
+    return sendSuccess(res, deletedMessage, deletedDoc);
+  } catch (error: any) {
+    return sendError(res, "Internal server error", error.message);
+  }
+} 

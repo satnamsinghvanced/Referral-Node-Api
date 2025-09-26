@@ -6,9 +6,10 @@ import { idParamSchema } from "../validators/idValidator.ts";
 import { docReferrerValidation } from "../validators/docReferrerValidate.ts";
 const docReferrerRoutes = express.Router();
 
-docReferrerRoutes.get(CR.ROOT,referrerController.getDocReferrer)
-docReferrerRoutes.post(CR.ID_PARAM,validateParams(idParamSchema),validateBody(docReferrerValidation.create),referrerController.addReferrerDoctor)
-docReferrerRoutes.put(CR.ID_PARAM,validateParams(idParamSchema),validateBody(docReferrerValidation.update),referrerController.updateReferrerDoctor)
-docReferrerRoutes.delete(CR.ID_PARAM,validateParams(idParamSchema),referrerController.deleteReferredDoctor)
+docReferrerRoutes.get(CR.ROOT, referrerController.getAll)
+docReferrerRoutes.get(CR.ID_PARAM, referrerController.get)
+docReferrerRoutes.post(CR.ID_PARAM, validateParams(idParamSchema), validateBody(docReferrerValidation.create), referrerController.create)
+docReferrerRoutes.put(CR.ID_PARAM, validateParams(idParamSchema), validateBody(docReferrerValidation.update), referrerController.update)
+docReferrerRoutes.delete(CR.ID_PARAM, validateParams(idParamSchema), referrerController.delete)
 
 export default docReferrerRoutes;

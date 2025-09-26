@@ -13,9 +13,8 @@ import { paginate } from "../../utils/pagination.ts";
 class UserController {
   static async signup(req: Request, res: Response): Promise<Response> {
     try {
-        const subscription = await validateEntityById(Subscription, req.body.subscriptionId, res, UM.VALIDATION.INVALID_SUBSCRIPTION);
-        if (!subscription) return res;
-
+      const subscription = await validateEntityById(Subscription, req.body.subscriptionId, res, UM.VALIDATION.INVALID_SUBSCRIPTION);
+      if (!subscription) return res;
       const medicalSpecialty = await validateEntityById(PracticeType, req.body.medicalSpecialtyId, res, UM.VALIDATION.INVALID_MEDICAL_SPECIALITY);
       if (!medicalSpecialty) return res;
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -44,9 +43,9 @@ class UserController {
     try {
       const { email, password, rememberMe } = req.body;
       const user = await User.findOne({ email }).select("+password");
-      if (!user) return sendError(res, UM.VALIDATION.INVALID_CREDENTIALS);
+      if (!user) return sendError(res, UM.VALIDATION.VALIDATION_ERROR, UM.VALIDATION.INVALID_CREDENTIALS_EMAIL);
       const validPass = await bcrypt.compare(password, user.password);
-      if (!validPass) return sendError(res, UM.VALIDATION.INVALID_CREDENTIALS);
+      if (!validPass) return sendError(res, UM.VALIDATION.VALIDATION_ERROR, UM.VALIDATION.INVALID_CREDENTIALS_PASS);
       const payload = { userId: user._id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName, email: user.email };
       const accessToken = generateAccessToken(payload, rememberMe);
       const refreshToken = generateRefreshToken(payload, rememberMe);
@@ -58,7 +57,6 @@ class UserController {
       return sendError(res, UM.SERVER_ERROR, error.message);
     }
   }
-
 
   static async getAllUser(req: Request, res: Response): Promise<Response> {
     try {
@@ -72,7 +70,6 @@ class UserController {
       return sendError(res, UM.SERVER_ERROR, error.message);
     }
   }
-
 
   static async getUserById(req: Request, res: Response): Promise<Response> {
     try {

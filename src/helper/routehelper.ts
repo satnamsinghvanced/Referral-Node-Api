@@ -19,8 +19,8 @@ const ROUTES = {
   PAYMENTS: "/payment",
   PERMISSION: "/permission",
   PRACTICE_TYPE: "/practice",
-  DOC_REFERRER: "/docReferrer",
-  PAT_REFERRER: "/patientReferrer"
+  DOC_REFERRER: "/doctor",
+  PAT_REFERRER: "/patient"
 };
 
 export { COMMON_ROUTES, ROUTES, AUTH_ROUTE };

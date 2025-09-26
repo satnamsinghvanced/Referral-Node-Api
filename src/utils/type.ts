@@ -31,6 +31,4 @@ export interface IPayment extends Document {
   updatedAt: Date;
 }
 
-export interface DocReferrerType {
-  email?: string;
-}
+

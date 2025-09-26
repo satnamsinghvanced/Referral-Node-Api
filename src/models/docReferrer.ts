@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const docReferrerSchema = new Schema(
+const doctorReferrerSchema = new Schema(
   {
     referredBy: {
       type: Schema.Types.ObjectId,
@@ -11,10 +11,10 @@ const docReferrerSchema = new Schema(
     type: {
       type: String,
       required: true,
+      enum: ["doctor"],
       default: "doctor",
       index: true,
     },
-
     name: {
       type: String,
       required: true,
@@ -31,7 +31,6 @@ const docReferrerSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-
     practiceName: {
       type: String,
       trim: true,
@@ -42,31 +41,44 @@ const docReferrerSchema = new Schema(
     },
     practiceType: {
       type: Schema.Types.ObjectId,
-      ref: "practiceType"
+      ref: "PracticeType",
+      required: true,
     },
-
     notes: {
       type: String,
       trim: true,
     },
-
     isActive: {
       type: Boolean,
       default: true,
     },
-
     qrCode: {
       type: String,
     },
-    status:{
+    addedVia: {
       type: String,
-        enum:["New", "Schedule", "Completed"],
-        default:"New"
-    }
+      enum: ["QR", "NFC", "Manual"],
+      default: "Manual",
+    },
+    referrals: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Referral",
+      },
+    ],
+    referralStats: {
+      total: {
+        type: Number,
+        default: 0,
+      },
+      thisMonth: {
+        type: Number,
+        default: 0,
+      },
+    },
   },
   { timestamps: true, strict: true }
 );
 
-const docReferrer = mongoose.model("docReferrer", docReferrerSchema);
-
-export default docReferrer;
+const DoctorReferrer = mongoose.model("DoctorReferrer", doctorReferrerSchema);
+export default DoctorReferrer;

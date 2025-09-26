@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import { ref } from "process";
 
 const patientReferrerSchema = new Schema(
   {
@@ -12,10 +11,10 @@ const patientReferrerSchema = new Schema(
     type: {
       type: String,
       required: true,
+      enum: ["patient"],
       default: "patient",
       index: true,
     },
-
     name: {
       type: String,
       required: true,
@@ -36,21 +35,39 @@ const patientReferrerSchema = new Schema(
       type: String,
       trim: true,
     },
-
     isActive: {
       type: Boolean,
       default: true,
     },
-
-    status:{
-        type: String,
-        enum:["New", "Schedule", "Completed"],
-        default:"New"
-    }
+    status: {
+      type: String,
+      enum: ["New", "Schedule", "Completed"],
+      default: "New",
+    },
+    addedVia: {
+      type: String,
+      enum: ["QR", "NFC", "Manual"],
+      default: "Manual",
+    },
+    referrals: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Referral",
+      },
+    ],
+    referralStats: {
+      total: {
+        type: Number,
+        default: 0,
+      },
+      thisMonth: {
+        type: Number,
+        default: 0,
+      },
+    },
   },
   { timestamps: true, strict: true }
 );
 
-const patientReferrer = mongoose.model("patientReferrer", patientReferrerSchema)
-
-export default patientReferrer;
+const PatientReferrer = mongoose.model("PatientReferrer", patientReferrerSchema);
+export default PatientReferrer;
