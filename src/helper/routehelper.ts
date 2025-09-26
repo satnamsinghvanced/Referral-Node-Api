@@ -1,5 +1,3 @@
-import { PATIENT_REFERRER_MESSAGES } from "../constant/patientReferrer";
-
 const COMMON_ROUTES = {
   ROOT: "/",
   ID_PARAM: "/:id"

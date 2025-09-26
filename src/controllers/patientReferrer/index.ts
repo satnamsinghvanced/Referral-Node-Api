@@ -2,22 +2,23 @@ import { Request, Response } from "express";
 import patientReferrer from "../../models/patientReferrer.ts";
 import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
 import { PATIENT_REFERRER_MESSAGES } from "../../constant/patientReferrer.ts";
-import mongoose from "mongoose";
 import User from "../../models/user.ts";
+import {
+  deleteById,
+  validateEntityById,
+} from "../../utils/validateEntityById.ts";
 
 export default {
   async addReferrerPatient(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const referringUser = await User.findById(req.params.id);
-      if (!referringUser) {
-        return sendError(
-          res,
-          PATIENT_REFERRER_MESSAGES.REFERRED_BY_NOT_FOUND,
-          undefined,
-          404
-        );
-      }
+      const referringUser = await validateEntityById(
+        User,
+        id,
+        res,
+        PATIENT_REFERRER_MESSAGES.REFERRED_BY_NOT_FOUND
+      );
+      if (!referringUser) return res;
       const { name, number, email, notes } = req.body;
 
       const existingReferrer = await patientReferrer.findOne({
@@ -60,21 +61,17 @@ export default {
   async updateReferrerPatient(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const { name, number, email, notes, isActive } = req.body;
-
-      const existingReferrer = await patientReferrer.findById(id);
-      if (!existingReferrer) {
-        return sendError(
-          res,
-          PATIENT_REFERRER_MESSAGES.NOT_FOUND,
-          undefined,
-          404
-        );
-      }
-
-      if (email && email !== existingReferrer.email) {
+      const updateData = req.body;
+      const existingReferrer = (await validateEntityById(
+        patientReferrer,
+        id,
+        res,
+        PATIENT_REFERRER_MESSAGES.NOT_FOUND
+      )) as any | null;
+      if (!existingReferrer) return res;
+      if (updateData.email && updateData.email !== existingReferrer.email) {
         const emailExists = await patientReferrer.findOne({
-          email,
+          email: updateData.email,
           _id: { $ne: id },
         });
         if (emailExists) {
@@ -87,8 +84,6 @@ export default {
         }
       }
 
-      const updateData = req.body;
-    
       const updatedReferrer = await patientReferrer
         .findByIdAndUpdate(id, updateData, {
           new: true,
@@ -111,31 +106,13 @@ export default {
   },
 
   async deleteReferrerPatient(req: Request, res: Response): Promise<Response> {
-    try {
-      const deletedReferrer = await patientReferrer.findByIdAndDelete(
-        req.params.id
-      );
-      if (!deletedReferrer) {
-        return sendError(
-          res,
-          PATIENT_REFERRER_MESSAGES.NOT_FOUND,
-          undefined,
-          404
-        );
-      }
-
-      return sendSuccess(
-        res,
-        PATIENT_REFERRER_MESSAGES.DELETED,
-        deletedReferrer
-      );
-    } catch (error: any) {
-      return sendError(
-        res,
-        PATIENT_REFERRER_MESSAGES.SERVER_ERROR,
-        error.message
-      );
-    }
+    return deleteById(
+      patientReferrer,
+      req.params.id,
+      res,
+      PATIENT_REFERRER_MESSAGES.NOT_FOUND,
+      PATIENT_REFERRER_MESSAGES.DELETED
+    );
   },
 
   async getReferrerPatients(req: Request, res: Response): Promise<Response> {
@@ -160,19 +137,12 @@ export default {
 
   async getReferrerPatient(req: Request, res: Response): Promise<Response> {
     try {
-      const referrer = await patientReferrer
-        .findById(req.params.id)
-        .populate("referredBy", "name email");
-
-      if (!referrer) {
-        return sendError(
-          res,
-          PATIENT_REFERRER_MESSAGES.NOT_FOUND,
-          undefined,
-          404
-        );
-      }
-
+      const referrer = await validateEntityById(
+        patientReferrer,
+        req.params.id,
+        res,
+        PATIENT_REFERRER_MESSAGES.NOT_FOUND
+      );
       return sendSuccess(
         res,
         PATIENT_REFERRER_MESSAGES.FETCH_ONE_SUCCESS,

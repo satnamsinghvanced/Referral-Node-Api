@@ -3,7 +3,7 @@ export const DOC_REFERRER_MESSAGES = {
   CREATED_MESSAGE: "Doctor referrer added successfully",
   UPDATED_MESSAGE: "Doctor referrer updated successfully",
   DELETED_MESSAGE: "Doctor referrer deleted successfully",
-  NOT_FOUND: "Doctor referrer not found",
+  NOT_FOUND: "Referrer Doctor Id not found",
   CONFLICT_EMAIL_EXISTS: "A doctor referrer with this email already exists for this user",
   REQUIRED_FIELDS: "Name, number, and email are required",
   INVALID_REFERRED_BY_ID: "Invalid referredBy ID",

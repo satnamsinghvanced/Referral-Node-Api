@@ -121,4 +121,4 @@ export default {
       DOC_REFERRER_MESSAGES.DELETED_MESSAGE
     );
   }
-};
+};  
