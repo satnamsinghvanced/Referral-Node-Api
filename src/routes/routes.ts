@@ -8,6 +8,7 @@ import permissionRoute from "./permission.ts";
 import practiceType from "./practiceType.ts";
 import docReferrerRoutes from "./docReferrerRoutes.ts";
 import patientReferrerRoutes from "./patientReferrerRoute.ts";
+import { verifyToken } from "../controllers/users/auth.ts";
 const router = express.Router();
 
 router.use(R.USERS, userRouter);
@@ -16,7 +17,7 @@ router.use(R.PAYMENTS, paymentRoute);
 router.use(R.ROLES, roleRouter);
 router.use(R.PERMISSION, permissionRoute);
 router.use(R.PRACTICE_TYPE, practiceType);
-router.use(R.DOC_REFERRER,docReferrerRoutes);
-router.use(R.PAT_REFERRER,patientReferrerRoutes);
+router.use(R.DOC_REFERRER, verifyToken, docReferrerRoutes);
+router.use(R.PAT_REFERRER, verifyToken, patientReferrerRoutes);
 
 export default router

@@ -11,8 +11,13 @@ export const docReferrerValidation = {
     practiceAddress: Joi.string().trim().allow("").optional(),
     practiceType: objectId().required().messages(DRV.PRACTICE_TYPE),
     notes: Joi.string().trim().allow("").optional(),
+    type: Joi.string().required().optional(),
+    referrals: Joi.array().items(objectId()).optional(),
+    referralStats: Joi.object({
+      total: Joi.number().min(0).optional(),
+      thisMonth: Joi.number().min(0).optional(),
+    }).optional(),
     isActive: Joi.boolean().optional(),
-    status: Joi.string().valid("New", "Schedule", "Completed").optional(),
     addedVia: Joi.string().valid("QR", "NFC", "Manual").optional(),
   }),
 
@@ -27,5 +32,11 @@ export const docReferrerValidation = {
     isActive: Joi.boolean().optional(),
     status: Joi.string().valid("New", "Schedule", "Completed").optional(),
     addedVia: Joi.string().valid("QR", "NFC", "Manual").optional(),
+    type: Joi.string().required().optional(),
+    referrals: Joi.array().items(objectId()).optional(),
+    referralStats: Joi.object({
+      total: Joi.number().min(0).optional(),
+      thisMonth: Joi.number().min(0).optional(),
+    }).optional(),
   }),
 };

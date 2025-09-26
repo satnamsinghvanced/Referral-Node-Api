@@ -4,6 +4,7 @@ import { COMMON_ROUTES as CR } from "../helper/routehelper.ts";
 import { validateBody, validateParams } from "../validators/validator.ts";
 import { idParamSchema } from "../validators/idValidator.ts";
 import { docReferrerValidation } from "../validators/docReferrerValidate.ts";
+
 const docReferrerRoutes = express.Router();
 
 docReferrerRoutes.get(CR.ROOT, referrerController.getAll)

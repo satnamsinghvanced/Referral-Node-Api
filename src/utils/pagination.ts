@@ -10,12 +10,14 @@ interface PaginationResult<T> {
   hasPrevPage: boolean;
 }
 
+type PopulateField = string | { path: string; select?: string; [key: string]: any };
+
 export async function paginate<T extends Document>(
   model: Model<any>,
   page: number = 1,
   limit: number = 10,
   query: object = {},
-  populateFields: string[] = []
+  populateFields: PopulateField[] = []
 ): Promise<PaginationResult<T>> {
   const skip = (page - 1) * limit;
 
@@ -26,10 +28,16 @@ export async function paginate<T extends Document>(
 
   if (populateFields.length) {
     populateFields.forEach((field) => {
-      queryBuilder = queryBuilder.populate(field);
+      if (typeof field === "string") {
+        queryBuilder = queryBuilder.populate(field);
+      } else if (typeof field === "object" && field.path) {
+        queryBuilder = queryBuilder.populate(field);
+      }
     });
   }
+
   const data = await queryBuilder.exec();
+
   return {
     data,
     totalDocs,

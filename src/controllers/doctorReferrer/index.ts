@@ -36,7 +36,7 @@ export default {
         .populate("practiceType")
         .populate("referrals")
       if (!doctor) {
-        return sendError(res, DOC_REFERRER_MESSAGES.NOT_FOUND, undefined, 404);
+        return sendError(res, DOC_REFERRER_MESSAGES.VALIDATION_ERROR, DOC_REFERRER_MESSAGES.NOT_FOUND, 404);
       }
       return sendSuccess(res, DOC_REFERRER_MESSAGES.FETCH_ALL_SUCCESS, doctor);
     } catch (error: any) {
@@ -49,25 +49,20 @@ export default {
       const { id: referredBy } = req.params;
       const user = await validateEntityById(User, referredBy, res, DOC_REFERRER_MESSAGES.REFERRING_USER_NOT_FOUND);
       if (!user) return res;
-
       const existing = await docReferrer.findOne({ email: req.body.email, referredBy });
       if (existing) {
-        return sendError(res, DOC_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, undefined, 409);
+        return sendError(res, DOC_REFERRER_MESSAGES.VALIDATION_ERROR, DOC_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, 409);
       }
-
       const newReferrer = new docReferrer({
         ...req.body,
         referredBy,
       });
-
       const referralUrl = `${FRONTEND_URL}/${newReferrer._id}`;
       newReferrer.qrCode = await QRCode.toDataURL(referralUrl);
       const saved = await newReferrer.save();
-
       const populated = await docReferrer.findById(saved._id)
-        .populate("referredBy")
+        .populate("referredBy", "firstName lastName email")
         .populate("practiceType");
-
       return sendSuccess(res, DOC_REFERRER_MESSAGES.CREATED_MESSAGE, populated, 201);
     } catch (error: any) {
       return sendError(res, DOC_REFERRER_MESSAGES.SERVER_ERROR, error.message);
@@ -78,7 +73,6 @@ export default {
     try {
       const { id: referrerId } = req.params;
       const updateData = req.body;
-
       const existingReferrer = (await validateEntityById(docReferrer, referrerId, res, DOC_REFERRER_MESSAGES.NOT_FOUND)) as any | null;
       if (!existingReferrer) return res;
 
@@ -87,7 +81,7 @@ export default {
           email: updateData.email,
           _id: { $ne: referrerId },
         });
-        if (emailExists) return sendError(res, DOC_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, undefined, 409);
+        if (emailExists) return sendError(res, DOC_REFERRER_MESSAGES.VALIDATION_ERROR, DOC_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, 409);
       }
 
       const updatedReferrer = await docReferrer.findByIdAndUpdate(
@@ -96,14 +90,14 @@ export default {
         { new: true, runValidators: true }
       );
 
-      if (!updatedReferrer) return sendError(res, DOC_REFERRER_MESSAGES.NOT_FOUND, undefined, 404);
+      if (!updatedReferrer) return sendError(res, DOC_REFERRER_MESSAGES.VALIDATION_ERROR, DOC_REFERRER_MESSAGES.NOT_FOUND, 404);
 
       const referralUrl = `${FRONTEND_URL}/${updatedReferrer._id}`;
       updatedReferrer.qrCode = await QRCode.toDataURL(referralUrl);
       await updatedReferrer.save();
 
       const populatedReferrer = await docReferrer.findById(updatedReferrer._id)
-        .populate("referredBy")
+        .populate("referredBy", "firstName lastName email")
         .populate("practiceType");
 
       return sendSuccess(res, DOC_REFERRER_MESSAGES.UPDATED_MESSAGE, populatedReferrer);
@@ -111,7 +105,6 @@ export default {
       return sendError(res, DOC_REFERRER_MESSAGES.SERVER_ERROR, error.message);
     }
   },
-
   async delete(req: Request, res: Response): Promise<Response> {
     return deleteById(
       docReferrer,

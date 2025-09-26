@@ -1,46 +1,33 @@
 import Joi from "joi";
 import mongoose from "mongoose";
-
-// ObjectId custom validation
-const objectId = () =>
-  Joi.string().custom((value, helpers) => {
-    if (!mongoose.Types.ObjectId.isValid(value)) {
-      return helpers.message({ custom: "Invalid ObjectId format" });
-    }
-    return value;
-  }, "ObjectId Validation");
+import { PATIENT_REFERRER_VALIDATION as PRV } from "../constant/patientReferrer.ts";
+import { objectId } from "./idValidator.ts";
 
 export const patientReferrerValidation = {
   create: Joi.object({
-    name: Joi.string().trim().required().messages({
-      "any.required": "Name is required.",
-      "string.empty": "Name cannot be empty.",
-    }),
-    number: Joi.string().trim().required().messages({
-      "any.required": "Number is required.",
-      "string.empty": "Number cannot be empty.",
-    }),
-    email: Joi.string().email().trim().required().messages({
-      "any.required": "Email is required.",
-      "string.email": "Email must be a valid email address.",
-      "string.empty": "Email cannot be empty.",
-    }),
-    notes: Joi.string().allow("").optional(),
+    name: Joi.string().trim().required().messages(PRV.NAME),
+    number: Joi.string().trim().required().messages(PRV.NUMBER),
+    email: Joi.string().email().lowercase().trim().required().messages(PRV.EMAIL),
+    notes: Joi.string().trim().allow("").optional(),
     isActive: Joi.boolean().optional(),
-    status: Joi.string()
-      .valid("New", "Schedule", "Completed")
-      .optional()
-      .messages({
-        "any.only": "Status must be one of: New, Schedule, Completed.",
-      }),
+    status: Joi.string().valid("New", "Schedule", "Completed").optional(),
+    addedVia: Joi.string().valid("QR", "NFC", "Manual").optional(),
+    type: Joi.string().required().optional(),
+    referrals: Joi.array().items(objectId()).optional(),
+    referralStats: Joi.object({
+      total: Joi.number().min(0).optional(),
+      thisMonth: Joi.number().min(0).optional(),
+    }).optional(),
   }),
 
   update: Joi.object({
     name: Joi.string().trim().optional(),
     number: Joi.string().trim().optional(),
-    email: Joi.string().email().trim().optional(),
-    notes: Joi.string().allow("").optional(),
+    email: Joi.string().email().lowercase().trim().optional().messages(PRV.EMAIL_OPTIONAL),
+    notes: Joi.string().trim().allow("").optional(),
     isActive: Joi.boolean().optional(),
     status: Joi.string().valid("New", "Schedule", "Completed").optional(),
+    addedVia: Joi.string().valid("QR", "NFC", "Manual").optional(),
+    type: Joi.string().required().optional(),
   }),
 };

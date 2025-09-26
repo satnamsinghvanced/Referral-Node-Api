@@ -52,7 +52,7 @@ const patientReferrerSchema = new Schema(
     referrals: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Referral",
+        // ref: "Referral",
       },
     ],
     referralStats: {

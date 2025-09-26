@@ -7,7 +7,7 @@ export async function validateEntityById<T extends Document>(
   id: string,
   res: Response,
   errorMessage: string
-): Promise<T | null> {
+): Promise<any | null> {
   if (!id || typeof id !== "string") {
     sendError(res, errorMessage);
     return null;
@@ -35,7 +35,7 @@ export async function deleteById<T extends Document>(
     if (!deletedDoc) {
       return sendError(res, notFoundMessage, undefined, 404);
     }
-    return sendSuccess(res, deletedMessage, deletedDoc);
+    return sendSuccess(res, deletedMessage);
   } catch (error: any) {
     return sendError(res, "Internal server error", error.message);
   }

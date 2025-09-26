@@ -41,7 +41,7 @@ const doctorReferrerSchema = new Schema(
     },
     practiceType: {
       type: Schema.Types.ObjectId,
-      ref: "PracticeType",
+      ref: "practiceType",
       required: true,
     },
     notes: {
@@ -63,7 +63,7 @@ const doctorReferrerSchema = new Schema(
     referrals: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Referral",
+        // ref: "Referral",
       },
     ],
     referralStats: {
@@ -80,5 +80,5 @@ const doctorReferrerSchema = new Schema(
   { timestamps: true, strict: true }
 );
 
-const DoctorReferrer = mongoose.model("DoctorReferrer", doctorReferrerSchema);
+const DoctorReferrer = mongoose.model("doctorReferrer", doctorReferrerSchema);
 export default DoctorReferrer;

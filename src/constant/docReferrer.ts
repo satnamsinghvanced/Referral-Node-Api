@@ -1,15 +1,16 @@
 export const DOC_REFERRER_MESSAGES = {
-  FETCH_ALL_SUCCESS: "All referring doctors fetched successfully",
-  CREATED_MESSAGE: "Doctor referrer added successfully",
-  UPDATED_MESSAGE: "Doctor referrer updated successfully",
-  DELETED_MESSAGE: "Doctor referrer deleted successfully",
-  NOT_FOUND: "Doctor referrer not found",
-  CONFLICT_EMAIL_EXISTS: "A doctor referrer with this email already exists for this user",
+  FETCH_ALL_SUCCESS: "All doctors fetched successfully",
+  CREATED_MESSAGE: "Doctor added successfully",
+  UPDATED_MESSAGE: "Doctor updated successfully",
+  DELETED_MESSAGE: "Doctor deleted successfully",
+  NOT_FOUND: "Doctor not found",
+  CONFLICT_EMAIL_EXISTS: "A doctor with this email already exists for this user",
   REQUIRED_FIELDS: "Name, number, and email are required",
   INVALID_REFERRED_BY_ID: "Invalid referredBy ID",
   REFERRING_USER_NOT_FOUND: "Referring user not found",
   SERVER_ERROR: "Internal server error",
-  MISSING_ID: "Invalid ID"
+  MISSING_ID: "Invalid ID",
+  VALIDATION_ERROR: "Validation Error",
 };
 
 export const DOCTOR_REFERRER_VALIDATION = {

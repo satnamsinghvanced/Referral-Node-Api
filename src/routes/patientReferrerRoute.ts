@@ -7,10 +7,10 @@ import { idParamSchema } from "../validators/idValidator.ts";
 
 const patientReferrerRoutes = express.Router();
 
-patientReferrerRoutes.post(CR.ID_PARAM,validateParams(idParamSchema),validateBody(patientReferrerValidation.create),patientController.addReferrerPatient)
-patientReferrerRoutes.put(CR.ID_PARAM,validateParams(idParamSchema),validateBody(patientReferrerValidation.update),patientController.updateReferrerPatient)
-patientReferrerRoutes.delete(CR.ID_PARAM,validateParams(idParamSchema),patientController.deleteReferrerPatient)
-patientReferrerRoutes.get(CR.ID_PARAM,validateParams(idParamSchema),patientController.getReferrerPatient)
-patientReferrerRoutes.get(CR.ROOT,patientController.getReferrerPatients)
+patientReferrerRoutes.post(CR.ID_PARAM, validateParams(idParamSchema), validateBody(patientReferrerValidation.create), patientController.create)
+patientReferrerRoutes.put(CR.ID_PARAM, validateParams(idParamSchema), validateBody(patientReferrerValidation.update), patientController.update)
+patientReferrerRoutes.delete(CR.ID_PARAM, validateParams(idParamSchema), patientController.delete)
+patientReferrerRoutes.get(CR.ID_PARAM, validateParams(idParamSchema), patientController.get)
+patientReferrerRoutes.get(CR.ROOT, patientController.getAll)
 
 export default patientReferrerRoutes;
