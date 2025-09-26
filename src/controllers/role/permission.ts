@@ -30,7 +30,7 @@ class Permission {
       return sendSuccess(res, PM.CREATED_MESSAGE, permission, 201);
     } catch (error: any) {
       if (error.code === 11000) {
-        return sendError(res, PM.CONFLICT_TITLE_EXISTS, undefined, 409);
+        return sendError(res, PM.VALIDATION_ERROR, PM.CONFLICT_TITLE_EXISTS, 409);
       }
       return sendError(res, PM.SERVER_ERROR, error.message);
     }

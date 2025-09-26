@@ -3,9 +3,12 @@ import bcrypt from "bcryptjs";
 import User from "../../models/user.ts";
 import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
 import { USER_MESSAGE as UM } from "../../constant/userMessage.ts";
-import { generateAccessToken, generateRefreshToken } from "../../middleware/auth/tokenService.ts";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../../middleware/auth/tokenService.ts";
 import Subscription from "../../models/subscriptionSchema.ts";
-import getFileUrl from "../../helper/fileUrlHelper.ts"
+import getFileUrl from "../../helper/fileUrlHelper.ts";
 import PracticeType from "../../models/practiceType.ts";
 import { validateEntityById } from "../../utils/validateEntityById.ts";
 import { paginate } from "../../utils/pagination.ts";
@@ -13,9 +16,19 @@ import { paginate } from "../../utils/pagination.ts";
 class UserController {
   static async signup(req: Request, res: Response): Promise<Response> {
     try {
-      const subscription = await validateEntityById(Subscription, req.body.subscriptionId, res, UM.VALIDATION.INVALID_SUBSCRIPTION);
+      const subscription = await validateEntityById(
+        Subscription,
+        req.body.subscriptionId,
+        res,
+        UM.VALIDATION.INVALID_SUBSCRIPTION
+      );
       if (!subscription) return res;
-      const medicalSpecialty = await validateEntityById(PracticeType, req.body.medicalSpecialtyId, res, UM.VALIDATION.INVALID_MEDICAL_SPECIALITY);
+      const medicalSpecialty = await validateEntityById(
+        PracticeType,
+        req.body.medicalSpecialtyId,
+        res,
+        UM.VALIDATION.INVALID_MEDICAL_SPECIALITY
+      );
       if (!medicalSpecialty) return res;
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
       const image = getFileUrl(req.file);
@@ -27,13 +40,18 @@ class UserController {
         role: req.body.role || "admin",
         image,
         medicalSpecialty: medicalSpecialty._id,
-        access: true
+        access: true,
       });
       await user.save();
       return sendSuccess(res, UM.SUCCESS.USER_REGISTERED, user, 201);
     } catch (error: any) {
       if (error.code === 11000 && error.keyPattern?.email) {
-        return sendError(res, UM.VALIDATION.VALIDATION_ERROR, UM.VALIDATION.USER_EXISTS, 404);
+        return sendError(
+          res,
+          UM.VALIDATION.VALIDATION_ERROR,
+          UM.VALIDATION.USER_EXISTS,
+          404
+        );
       }
       return sendError(res, UM.SERVER_ERROR, error.message);
     }
@@ -43,16 +61,36 @@ class UserController {
     try {
       const { email, password, rememberMe } = req.body;
       const user = await User.findOne({ email }).select("+password");
-      if (!user) return sendError(res, UM.VALIDATION.VALIDATION_ERROR, UM.VALIDATION.INVALID_CREDENTIALS_EMAIL);
+      if (!user)
+        return sendError(
+          res,
+          UM.VALIDATION.VALIDATION_ERROR,
+          UM.VALIDATION.INVALID_CREDENTIALS_EMAIL
+        );
       const validPass = await bcrypt.compare(password, user.password);
-      if (!validPass) return sendError(res, UM.VALIDATION.VALIDATION_ERROR, UM.VALIDATION.INVALID_CREDENTIALS_PASS);
-      const payload = { userId: user._id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName, email: user.email };
+      if (!validPass)
+        return sendError(
+          res,
+          UM.VALIDATION.VALIDATION_ERROR,
+          UM.VALIDATION.INVALID_CREDENTIALS_PASS
+        );
+      const payload = {
+        userId: user._id.toString(),
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        subscriptionId: user.subscriptionId,
+      };
       const accessToken = generateAccessToken(payload, rememberMe);
       const refreshToken = generateRefreshToken(payload, rememberMe);
       user.refreshToken = refreshToken;
       await user.save();
-      const { password: _, ...userData } = user.toObject();
-      return sendSuccess(res, UM.SUCCESS.LOGIN_SUCCESS, { user: userData, accessToken });
+      const { password: _ } = user.toObject();
+      return sendSuccess(res, UM.SUCCESS.LOGIN_SUCCESS, {
+        refreshToken,
+        accessToken,
+      });
     } catch (error: any) {
       return sendError(res, UM.SERVER_ERROR, error.message);
     }
@@ -62,9 +100,11 @@ class UserController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const paginationResult = await paginate(User, page, limit, {},
-        ["medicalSpecialty", "subscriptionId", "paymentId"]
-      );
+      const paginationResult = await paginate(User, page, limit, {}, [
+        "medicalSpecialty",
+        "subscriptionId",
+        "paymentId",
+      ]);
       return sendSuccess(res, UM.SUCCESS.ALL_USERS_FETCHED, paginationResult);
     } catch (error: any) {
       return sendError(res, UM.SERVER_ERROR, error.message);
@@ -86,7 +126,7 @@ class UserController {
   static async updateUser(req: Request, res: Response): Promise<Response> {
     try {
       const updateData = { ...req.body };
-      if ('email' in updateData) {
+      if ("email" in updateData) {
         delete updateData.email;
       }
       if (updateData.password) {
@@ -95,11 +135,15 @@ class UserController {
       if (req.file) {
         updateData.image = getFileUrl(req.file);
       }
-      const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, {
-        new: true,
-        runValidators: true,
-        context: "query",
-      }).select("-password");
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        {
+          new: true,
+          runValidators: true,
+          context: "query",
+        }
+      ).select("-password");
 
       if (!updatedUser) {
         return sendError(res, UM.VALIDATION.USER_NOT_FOUND);
@@ -130,7 +174,7 @@ class UserController {
       const userId = req.params.id;
       const user = await User.findById(userId);
       if (!user) return sendError(res, UM.VALIDATION.USER_NOT_FOUND);
-      if (!user.refreshToken) return sendError(res, UM.VALIDATION.TOKEN_ERROR)
+      if (!user.refreshToken) return sendError(res, UM.VALIDATION.TOKEN_ERROR);
       user.refreshToken = undefined;
       await user.save();
       return sendSuccess(res, UM.SUCCESS.LOGOUT_SUCCESS);

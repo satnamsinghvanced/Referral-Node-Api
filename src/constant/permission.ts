@@ -7,6 +7,8 @@ const PERMISSION_MESSAGES = {
   NOT_FOUND: "Permission not found",
   SERVER_ERROR: "Server error occurred",
   CONFLICT_TITLE_EXISTS: "Permission with this title already exists",
+    VALIDATION_ERROR: "Validation Error",
+
 };
 
 const VALIDATION_MESSAGES = {

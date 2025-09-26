@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import patientReferrer from "../../models/patientReferrer.ts";
 import { sendSuccess, sendError } from "../../helper/responseHelpers.ts";
 import { PATIENT_REFERRER_MESSAGES } from "../../constant/patientReferrer.ts";
-import mongoose from "mongoose";
 import User from "../../models/user.ts";
 import { deleteById, validateEntityById } from "../../utils/validateEntityById.ts";
 import { paginate } from "../../utils/pagination.ts";
@@ -64,19 +63,12 @@ export default {
 
   async get(req: Request, res: Response): Promise<Response> {
     try {
-      const referrer = await patientReferrer
-        .findById(req.params.id)
-        .populate("referredBy", "name email");
-
-      if (!referrer) {
-        return sendError(
-          res,
-          PATIENT_REFERRER_MESSAGES.NOT_FOUND,
-          undefined,
-          404
-        );
-      }
-
+      const referrer = await validateEntityById(
+        patientReferrer,
+        req.params.id,
+        res,
+        PATIENT_REFERRER_MESSAGES.NOT_FOUND
+      );
       return sendSuccess(
         res,
         PATIENT_REFERRER_MESSAGES.FETCH_ONE_SUCCESS,
