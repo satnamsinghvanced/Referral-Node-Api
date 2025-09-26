@@ -2,6 +2,7 @@ import PracticeType from "../models/practiceType.ts";
 import { sendError, sendSuccess } from "../helper/responseHelpers.ts";
 import { Request, Response } from "express";
 import { PRACTICE_TYPE_MESSAGES as PTM } from "../constant/practiceType.ts";
+import { deleteById, validateEntityById } from "../utils/validateEntityById.ts";
 
 class PracticeTypeController {
   static async getAll(req: Request, res: Response): Promise<Response> {
@@ -15,8 +16,13 @@ class PracticeTypeController {
 
   static async get(req: Request, res: Response): Promise<Response> {
     try {
-      const practiceType = await PracticeType.findById(req.params.id);
-      if (!practiceType) return sendError(res, PTM.NOT_FOUND);
+      const practiceType = await validateEntityById(
+        PracticeType,
+        req.params.id,
+        res,
+        PTM.NOT_FOUND
+      )
+      if (!practiceType) return res;
       return sendSuccess(res, PTM.FETCH_ONE_SUCCESS, practiceType);
     } catch (error: any) {
       return sendError(res, PTM.SERVER_ERROR, error.message);
@@ -43,7 +49,7 @@ class PracticeTypeController {
         req.body,
         { new: true, runValidators: true }
       );
-      if (!updatedPracticeType) return sendError(res, PTM.NOT_FOUND);
+      if (!updatedPracticeType) return sendError(res,PTM.VALIDATION_MESSAGES, PTM.NOT_FOUND, 409);
       return sendSuccess(res, PTM.UPDATED, updatedPracticeType);
     } catch (error: any) {
       if (error.code === 11000) {
@@ -54,13 +60,13 @@ class PracticeTypeController {
   }
 
   static async delete(req: Request, res: Response): Promise<Response> {
-    try {
-      const deletedPracticeType = await PracticeType.findByIdAndDelete(req.params.id);
-      if (!deletedPracticeType) return sendError(res, PTM.NOT_FOUND);
-      return sendSuccess(res, PTM.DELETED);
-    } catch (error: any) {
-      return sendError(res, PTM.SERVER_ERROR, error.message);
-    }
+      return deleteById(
+        PracticeType,
+        req.params.id,
+        res,
+        PTM.NOT_FOUND,
+        PTM.VALIDATION_MESSAGES
+      );
   }
 }
 

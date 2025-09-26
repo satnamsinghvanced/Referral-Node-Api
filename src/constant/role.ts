@@ -27,6 +27,7 @@ const ROLE_MESSAGES = {
   SERVER_ERROR: "Internal server error please try again!",
   SUCCESS_TEXT: "success" as ResponseStatus,
   ERROR_TEXT: "error" as ResponseStatus,
+  VALIDATION_ERROR: "Validation Error",
 };
 
 export { VALIDATION_MESSAGES, ROLE_MESSAGES };

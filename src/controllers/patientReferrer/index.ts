@@ -28,7 +28,7 @@ export default {
       if (!existingReferrer) return res;
       if (email && email !== existingReferrer.email) {
         const emailExists = await patientReferrer.findOne({ email, _id: { $ne: id } });
-        if (emailExists) { return sendError(res, PATIENT_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, undefined, 409); }
+        if (emailExists) { return sendError(res,PATIENT_REFERRER_MESSAGES.VALIDATION_ERROR, PATIENT_REFERRER_MESSAGES.CONFLICT_EMAIL_EXISTS, 409); }
       }
       const updatedReferrer = await patientReferrer.findByIdAndUpdate(id, req.body, { new: true, runValidators: true, }).populate("referredBy", "name email");
       return sendSuccess(res, PATIENT_REFERRER_MESSAGES.UPDATED, updatedReferrer);

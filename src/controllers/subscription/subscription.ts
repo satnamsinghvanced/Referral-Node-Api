@@ -17,7 +17,7 @@ class SubscriptionController {
   static async getOne(req: Request, res: Response): Promise<Response> {
     try {
       const subscription = await Subscription.findById(req.params.id);
-      if (!subscription) return sendError(res, SUBSCRIPTION_MESSAGES.NOT_FOUND, undefined, 404);
+      if (!subscription) return sendError(res,SUBSCRIPTION_MESSAGES.VALIDATION_MESSAGES, SUBSCRIPTION_MESSAGES.NOT_FOUND, 404);
       return sendSuccess(res, SUBSCRIPTION_MESSAGES.FETCH_MESSAGE, subscription);
     } catch (error: any) {
       return sendError(res, SUBSCRIPTION_MESSAGES.SERVER_ERROR, error.message);
@@ -43,7 +43,7 @@ class SubscriptionController {
         new: true,
         runValidators: true,
       });
-      if (!subscription) return sendError(res, SUBSCRIPTION_MESSAGES.NOT_FOUND, undefined, 404);
+      if (!subscription) return sendError(res, SUBSCRIPTION_MESSAGES.VALIDATION_MESSAGES, SUBSCRIPTION_MESSAGES.NOT_FOUND, 404);
       return sendSuccess(res, SUBSCRIPTION_MESSAGES.UPDATE_MESSAGE, subscription);
     } catch (error: any) {
       if (error.code === 11000) {
@@ -56,7 +56,7 @@ class SubscriptionController {
   static async delete(req: Request, res: Response): Promise<Response> {
     try {
       const subscription = await Subscription.findByIdAndDelete(req.params.id);
-      if (!subscription) return sendError(res, SUBSCRIPTION_MESSAGES.NOT_FOUND, undefined, 404);
+      if (!subscription) return sendError(res,SUBSCRIPTION_MESSAGES.VALIDATION_MESSAGES, SUBSCRIPTION_MESSAGES.NOT_FOUND, 404);
       return sendSuccess(res, SUBSCRIPTION_MESSAGES.DELETED_SUCCESS);
     } catch (error: any) {
       return sendError(res, SUBSCRIPTION_MESSAGES.SERVER_ERROR, error.message);

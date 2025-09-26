@@ -55,6 +55,7 @@ const SUBSCRIPTION_MESSAGES = {
   FETCH_MESSAGE: "Subscriptions fetched successfully",
   CREATED_MESSAGE: "Subscription created successfully",
   UPDATE_MESSAGE: "Subscription updated successfully",
+  VALIDATION_MESSAGES: "Validation Error"
 };
 
 export { VALIDATION_MESSAGES, SUBSCRIPTION_MESSAGES };

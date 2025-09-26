@@ -20,6 +20,7 @@ const PRACTICE_TYPE_MESSAGES = {
   NOT_FOUND: "Practice type not found",
   SERVER_ERROR: "Server error occurred",
   CONFLICT_TITLE_EXISTS: "Practice type with this title already exists",
+  VALIDATION_MESSAGES: "Validation Error"
 };
 
 export { VALIDATION_MESSAGES, PRACTICE_TYPE_MESSAGES };
